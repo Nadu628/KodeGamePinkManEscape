@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "KodeGame"
+rootProject.name = "Study Helper"
 include(":app")
  

@@ -15,11 +15,36 @@ class AuthRepository(private val dao: AuthDao){
         return bytes.joinToString("") {"%02x".format(it)}
     }
 
-    //register a parent and child in single operation
-    //parent passwordHash contains the plain password and replace with the hashed value before inserting
-    suspend fun registerParentWithChild(parent: Parent, child: Child): Long {
-        val parentToInsert = parent.copy(passwordHash = hashPassword(parent.passwordHash))
-        return dao.insertParentWithChildren(parentToInsert, listOf(child))
+    //parent registers first
+    suspend fun registerParent(firstName: String, lastName: String, dob: String,
+                               email: String, passwordPlain: String): Long {
+        val parent = Parent(
+            firstName = firstName,
+            lastName = lastName,
+            dob = dob,
+            email = email,
+            passwordHash = hashPassword(passwordPlain)
+        )
+        return dao.insertParent(parent)
+    }
+
+    //child register
+    suspend fun registerChild(parentId: Long, firstName: String, lastName: String,
+                              dob: String, username: String, passwordPlain: String): Long {
+        val child = Child(
+            parentId = parentId,
+            firstName = firstName,
+            lastName = lastName,
+            dob = dob,
+            username = username,
+            passwordHash = hashPassword(passwordPlain)
+        )
+        return dao.insertChild(child)
+    }
+
+    //lookup parent by child's name and dob
+    suspend fun lookupParentsForChild(first: String, last: String, dob: String): List<Parent>{
+        return dao.findParentsByChildNameDob(first,last,dob)
     }
 
     //parent login: find parent by email and verify hashed password
@@ -29,10 +54,11 @@ class AuthRepository(private val dao: AuthDao){
         return if (parent.passwordHash == hashed) parent else null
     }
 
-    //child login: find child by name + dob and return child + parentId
-    suspend fun loginChildByNameDob(first: String, last: String, dob: String): Pair<Child,Long>?{
-        val child = dao.findChildByNameDob(first,last,dob) ?: return null
-        return Pair(child, child.parentId)
+    //child login: find child by username and password
+    suspend fun loginChild(username: String, passwordPlain: String): Child?{
+        val child = dao.findChildByUsername(username) ?: return null
+        val hashed = hashPassword(passwordPlain)
+        return if(child.passwordHash == hashed) child else null
     }
 
     //observe parent with child for UI updates

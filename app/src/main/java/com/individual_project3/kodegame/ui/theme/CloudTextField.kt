@@ -25,6 +25,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.individual_project3.kodegame.R
+import androidx.compose.material3.Text
 
 val bubbleFont = FontFamily(Font(R.font.poppins_regular))
 
@@ -32,10 +33,11 @@ val bubbleFont = FontFamily(Font(R.font.poppins_regular))
 fun CloudTextField(
     value: String,
     onValueChange: (String) -> Unit,
-    label: String,
+    labelText: String,
     modifier: Modifier = Modifier,
     isError: Boolean = false,
     errorText: String? = null,
+    visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     singleLine: Boolean = true,
@@ -70,12 +72,13 @@ fun CloudTextField(
                 ),
                 label = {
                     Text(
-                        text = label,
+                        text = labelText,
                         style = TextStyle(fontFamily = bubbleFont, fontSize = 14.sp)
                     )
                 },
                 singleLine = singleLine,
                 trailingIcon = trailingIcon,
+                visualTransformation = visualTransformation,
                 isError = isError,
                 //make field look "flat" so outer box looks like a cloud
                 colors = TextFieldDefaults.colors(
@@ -86,9 +89,7 @@ fun CloudTextField(
                     cursorColor = Color.Black,
                     errorIndicatorColor = MaterialTheme.colorScheme.error
                 ),
-                keyboardOptions = keyboardOptions,
-                visualTransformation = if(label.contains("Password", ignoreCase = true)) PasswordVisualTransformation() else VisualTransformation.None,
-
+                keyboardOptions = keyboardOptions
             )
         }
 

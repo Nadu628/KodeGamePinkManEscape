@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.individual_project3.kodegame.data.model.Child
 import com.individual_project3.kodegame.data.model.Parent
 
-@Database(entities = [Parent::class, Child::class], version = 1, exportSchema = false)
+@Database(entities = [Parent::class, Child::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase(){
     abstract fun authDao(): AuthDao
 

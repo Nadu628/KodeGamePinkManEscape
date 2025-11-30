@@ -17,9 +17,11 @@ import androidx.room.PrimaryKey
     indices = [Index("parentId")]
 )
 data class Child(
-    @PrimaryKey(autoGenerate = true) val id: Long = 0L,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val parentId: Long,
     val firstName: String,
     val lastName: String,
-    val dob: String
+    val dob: String,
+    val username: String,
+    val passwordHash: String
 )

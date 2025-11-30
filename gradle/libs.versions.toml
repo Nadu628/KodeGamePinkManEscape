@@ -1,5 +1,5 @@
 [versions]
-agp = "8.4.0"
+agp = "8.6.0"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -15,6 +15,7 @@ roomKtx = "2.6.1"
 runtimeLivedata = "1.6.3"
 kotlinxSerializationJson = "1.6.3"
 kotlinxSerialization = "1.9.0"
+material3Lint = "1.4.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -39,6 +40,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 androidx-room-common = { group = "androidx.room", name = "room-common", version.ref = "roomCommon" }
 androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "roomKtx" }
+androidx-material3-lint = { group = "androidx.compose.material3", name = "material3-lint", version.ref = "material3Lint" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.individual_project3.kodegame"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.individual_project3.kodegame"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = 26
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -53,9 +53,11 @@ android {
 }
 
 dependencies {
+    implementation("androidx.compose.material:material-icons-extended:<compose_version>")
     implementation("androidx.datastore:datastore-preferences:1.2.0")
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.material3.lint)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.core.ktx)

@@ -1,5 +1,7 @@
 package com.individual_project3.kodegame.ui
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +14,7 @@ import com.individual_project3.kodegame.ui.authentication.parentAuthentication.P
 import com.individual_project3.kodegame.ui.splash.IdleCharacter
 import com.individual_project3.kodegame.ui.splash.SplashScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigation(){
     val navController = rememberNavController()
@@ -35,13 +38,10 @@ fun Navigation(){
             ParentLoginScreen(navController)
         }
 
-        /**composable("parent_registration_screen"){
+        composable("parent_registration_screen"){
             ParentRegistrationScreen(navController)
-        }**/
-
-        composable("child_registration_screen"){
-            ChildRegistrationScreen(navController)
         }
+
 
     }
 }

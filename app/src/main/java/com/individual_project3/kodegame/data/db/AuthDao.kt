@@ -16,29 +16,18 @@ interface AuthDao{
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChild(child: Child): Long
 
-    //convience transaction: insert parent then its child, returning parentId
-    //ensures atomicity
-    @Transaction
-    suspend fun insertParentWithChildren(parent: Parent, children: List<Child>): Long{
-        val parentId = insertParent(parent)
-        children.forEach{insertChild(it.copy(parentId = parentId))}
-        return parentId
-    }
-
-    //fetch parent with their child
-    @Transaction
-    @Query("select * from parents where id = :parentId")
-    fun getParentWithChild(parentId : Long): Flow<ParentWithChild?>
-
-    //find parent by email
-    @Query("select * from parents where email = :email limit 1")
+    @Query("select * from parents where email = :email limit 1 ")
     suspend fun findParentByEmail(email: String): Parent?
 
-    //find child by first/last/dob (used for child login)
-    @Query("select * from children where firstName = :first and lastName = :last and dob = :dob limit 1")
-    suspend fun findChildByNameDob(first: String, last: String, dob: String): Child?
+    @Query("select * from children where username = :username limit 1")
+    suspend fun findChildByUsername(username: String): Child?
 
-    //get parent by id
-    @Query("select * from parents where id = :id limit 1")
-    suspend fun getParentById(id: Long): Parent?
+    @Query("select * from parents where firstName = :childFirst and lastName = :childLast and dob = :childDob")
+    suspend fun findParentsByChildNameDob(childFirst: String, childLast: String, childDob: String): List<Parent>
+
+    @Transaction
+    @Query("select * from parents where id = :parentId")
+    fun getParentWithChild(parentId: Long): Flow<ParentWithChild?>
+
+
 }

@@ -1,7 +1,9 @@
 package com.individual_project3.kodegame.ui.authentication.parentAuthentication
 
+import android.os.Build
 import android.util.Patterns
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,13 +39,17 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.individual_project3.kodegame.data.model.Child
+import com.individual_project3.kodegame.data.model.Parent
+import com.individual_project3.kodegame.ui.authentication.AuthViewModel
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ParentRegistrationScreen(
     navController: NavController,
-    onRegister: ((parentFN: String, parentLN: String, parentDOB: String, childFN: String,
-                  childLN: String, childDOB: String, email: String, password: String) -> Unit)
+    viewModel: AuthViewModel = viewModel()
     ){
     val context = LocalContext.current
 
@@ -74,7 +80,7 @@ fun ParentRegistrationScreen(
     val gradient = Brush.verticalGradient(colors = listOf(Color(0xffb3e5fc), Color(0xffb2ff59)))
 
     //Date formatter for MM/DD/YYYY
-    val formatter = DateTimeFormatter.ofPattern("mm/dd/yyyy", Locale.US)
+    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.US)
 
     //helper to show DatePickerDialog and return formatted date
     fun showDatePicker(initialText: String?, onDateSelected: (String)-> Unit){
@@ -228,7 +234,7 @@ fun ParentRegistrationScreen(
                     parentFN = it
                     parentFNError = null
                 },
-                label = "First Name",
+                labelText = "First Name",
                 isError = parentFNError != null,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -242,7 +248,7 @@ fun ParentRegistrationScreen(
                     parentLN = it;
                     parentLNError = null
                 },
-                label = "Last Name",
+                labelText = "Last Name",
                 isError = parentLNError != null,
                 errorText = parentLNError,
                 modifier = Modifier.fillMaxWidth()
@@ -257,7 +263,7 @@ fun ParentRegistrationScreen(
                     parentDOB = it
                     parentDOBError = null
                 },
-                label = "Date of Birth (MM/DD/YYYY)",
+                labelText = "Date of Birth (MM/DD/YYYY)",
                 isError = parentDOBError != null,
                 errorText = parentDOBError,
                 trailingIcon = {
@@ -279,7 +285,7 @@ fun ParentRegistrationScreen(
                     childFN = it
                     childFNError = null
                 },
-                label = "Child's First Name",
+                labelText = "Child's First Name",
                 isError = childFNError != null,
                 errorText = childFNError,
                 modifier = Modifier.fillMaxWidth()
@@ -293,7 +299,7 @@ fun ParentRegistrationScreen(
                     childLN = it
                     childLNError = null
                 },
-                label = "Child's Last Name",
+                labelText = "Child's Last Name",
                 isError = childLNError != null,
                 errorText = childLNError,
                 modifier = Modifier.fillMaxWidth()
@@ -308,7 +314,7 @@ fun ParentRegistrationScreen(
                     childDOB = it
                     childDOBError = null
                 },
-                label = "Child's Date of Birth (MM/DD/YYYY)",
+                labelText = "Child's Date of Birth (MM/DD/YYYY)",
                 isError = childDOBError != null,
                 errorText = childDOBError,
                 trailingIcon = {
@@ -331,7 +337,7 @@ fun ParentRegistrationScreen(
                     email = it
                     emailError = null
                 },
-                label = "Email",
+                labelText = "Email",
                 isError = emailError != null,
                 errorText = emailError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -347,7 +353,7 @@ fun ParentRegistrationScreen(
                     password = it
                     passwordError = null
                 },
-                label = "Password",
+                labelText = "Password",
                 isError = passwordError != null,
                 errorText = passwordError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -367,12 +373,33 @@ fun ParentRegistrationScreen(
             Button(
                 onClick = {
                     val ok = validateAll()
-                    if(ok){
-                        onRegister?.invoke(parentFN.trim(), parentLN.trim(), parentDOB.trim(), childFN.trim(), childLN.trim(), childDOB.trim(), email.trim(), password.trim())
-                        navController.navigate("parent_login_screen")
-                        Toast.makeText(context, "Registered successfully", Toast.LENGTH_SHORT)
+                    if(ok) {
+                        val parent = Parent(
+                            firstName = parentFN.trim(),
+                            lastName = parentLN.trim(),
+                            dob = parentDOB.trim(),
+                            email = email.trim(),
+                            passwordHash = password.trim()
+                        )
+
+                        val child = Child(
+                            parentId = 0L,
+                            firstName = childFN,
+                            lastName = childLN,
+                            dob = childDOB,
+                            username = "",
+                            passwordHash = ""
+                        )
+
+                        viewModel.registerParent(parent, child){ id ->
+                            if(id != null){
+                                Toast.makeText(context, "Registered Successfully", Toast.LENGTH_SHORT).show()
+                                navController.navigate("pick_user_screen")
+                            }
+                        }
+
                     }else{
-                        Toast.makeText(context, "Please fix errors", Toast.LENGTH_SHORT)
+                        Toast.makeText(context, "Please fix errors", Toast.LENGTH_SHORT ).show()
                     }
                 },
                 enabled = allFilled,

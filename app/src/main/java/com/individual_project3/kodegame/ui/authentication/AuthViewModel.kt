@@ -43,7 +43,11 @@ class AuthViewModel(
                     lastName = parentLast,
                     dob = parentDob,
                     email = email,
-                    passwordPlain = password
+                    passwordPlain = password,
+                    childFN = childFirst,
+                    childLN = childLast,
+                    childDOB = childDob
+
                 )
                 sessionManager.setCurrentParentId(id) //persist session
                 onComplete(id)

@@ -84,7 +84,7 @@ fun CloudTextField(
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
-                    focusedIndicatorColor = Color(0xff4a90e2),
+                    focusedIndicatorColor = Color.White,
                     unfocusedIndicatorColor = Color(0xffb0bec5),
                     cursorColor = Color.Black,
                     errorIndicatorColor = MaterialTheme.colorScheme.error

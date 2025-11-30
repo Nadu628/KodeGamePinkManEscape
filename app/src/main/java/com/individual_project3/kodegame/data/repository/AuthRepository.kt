@@ -8,27 +8,31 @@ import kotlinx.coroutines.flow.Flow
 import java.security.MessageDigest
 
 class AuthRepository(private val dao: AuthDao){
-    //sha-256 hashing with a static
+    //hash password before saving
     private fun hashPassword(password: String, salt: String = "staticSalt"): String{
         val md = MessageDigest.getInstance("SHA-256")
         val bytes = md.digest((salt + password).toByteArray(Charsets.UTF_8))
         return bytes.joinToString("") {"%02x".format(it)}
     }
 
-    //parent registers first
+    //parent registers with child info
     suspend fun registerParent(firstName: String, lastName: String, dob: String,
-                               email: String, passwordPlain: String): Long {
+                               email: String, passwordPlain: String, childFN: String,
+                               childLN: String, childDOB: String): Long {
         val parent = Parent(
             firstName = firstName,
             lastName = lastName,
             dob = dob,
             email = email,
-            passwordHash = hashPassword(passwordPlain)
+            passwordHash = hashPassword(passwordPlain),
+            childFirstName = childFN,
+            childLastName = childLN,
+            childDOB = childDOB
         )
         return dao.insertParent(parent)
     }
 
-    //child register
+    //child register -> must select parent
     suspend fun registerChild(parentId: Long, firstName: String, lastName: String,
                               dob: String, username: String, passwordPlain: String): Long {
         val child = Child(

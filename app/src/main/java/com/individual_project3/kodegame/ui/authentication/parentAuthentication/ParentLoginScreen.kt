@@ -4,6 +4,9 @@ import android.R.attr.enabled
 import android.graphics.Paint
 import android.util.Patterns
 import android.widget.Toast
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +46,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import com.individual_project3.kodegame.ui.authentication.CloudButton
 
 @Composable
 fun ParentLoginScreen(navController: NavController,
@@ -87,7 +91,7 @@ fun ParentLoginScreen(navController: NavController,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(20.dp),
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -97,6 +101,7 @@ fun ParentLoginScreen(navController: NavController,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
+            Spacer(modifier = Modifier.height(40.dp))
             //email field
             CloudTextField(
                 value = email,
@@ -136,25 +141,26 @@ fun ParentLoginScreen(navController: NavController,
                 email.isNotBlank() && password.isNotBlank()
             }
 
-            Button(
-                onClick = {
-                    if(validateALl()){
-                        viewModel.loginParent(email.trim(), password.trim()){parent ->
-                            if(parent != null){
-                                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-                                navController.navigate("progress_screen"){
-                                    popUpTo("parent_login"){inclusive = true}
-                                }
-                            }else{
-                                Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
-                            }
+            AnimatedVisibility(
+                visible = allFilled,
+                enter = slideInHorizontally(initialOffsetX =  {it  }),
+                exit = fadeOut()
+            ) {
+                CloudButton("Login") {
+                    viewModel.loginParent(email, password){id ->
+                        if(id != null){
+                            navController.navigate("parent_progress_screen")
+                        }else{
+                            Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
                         }
                     }
-                },
-                enabled = allFilled,
-                modifier = Modifier.fillMaxWidth().height(52.dp)
-            ) {
-                Text("Login", fontFamily = bubbleFont)
+                }
+            }
+
+
+            Spacer(modifier = Modifier.height(12.dp))
+            CloudButton("Register") {
+                navController.navigate("parent_registration_screen")
             }
         }
     }

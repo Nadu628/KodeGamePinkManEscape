@@ -1,9 +1,10 @@
 package com.individual_project3.kodegame.ui.authentication.parentAuthentication
 
-import android.os.Build
 import android.util.Patterns
 import android.widget.Toast
-import androidx.annotation.RequiresApi
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,7 @@ import java.time.format.DateTimeParseException
 import java.util.Calendar
 import java.util.Locale
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
@@ -43,9 +45,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.individual_project3.kodegame.data.model.Child
 import com.individual_project3.kodegame.data.model.Parent
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
+import com.individual_project3.kodegame.ui.authentication.CloudButton
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 
-@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ParentRegistrationScreen(
     navController: NavController,
@@ -214,7 +216,7 @@ fun ParentRegistrationScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(20.dp),
-            verticalArrangement = Arrangement.Top,
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ){
             //Screen title
@@ -245,7 +247,7 @@ fun ParentRegistrationScreen(
             CloudTextField(
                 value = parentLN,
                 onValueChange = {
-                    parentLN = it;
+                    parentLN = it
                     parentLNError = null
                 },
                 labelText = "Last Name",
@@ -362,53 +364,50 @@ fun ParentRegistrationScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            //prechect to enable button
+            //precheck to enable button
             val allFilled = remember(parentFN, parentLN, parentDOB, childFN, childLN, childDOB, email, password) {
                 parentFN.isNotBlank() && parentLN.isNotBlank() && parentDOB.isNotBlank() &&
                         childFN.isNotBlank() && childLN.isNotBlank() && childDOB.isNotBlank() &&
                         email.isNotBlank() && password.length >= 6
             }
-
             //register button
-            Button(
-                onClick = {
-                    val ok = validateAll()
-                    if(ok) {
-                        val parent = Parent(
-                            firstName = parentFN.trim(),
-                            lastName = parentLN.trim(),
-                            dob = parentDOB.trim(),
-                            email = email.trim(),
-                            passwordHash = password.trim()
-                        )
-
-                        val child = Child(
-                            parentId = 0L,
-                            firstName = childFN,
-                            lastName = childLN,
-                            dob = childDOB,
-                            username = "",
-                            passwordHash = ""
-                        )
-
-                        viewModel.registerParent(parent, child){ id ->
-                            if(id != null){
-                                Toast.makeText(context, "Registered Successfully", Toast.LENGTH_SHORT).show()
-                                navController.navigate("pick_user_screen")
-                            }
-                        }
-
-                    }else{
-                        Toast.makeText(context, "Please fix errors", Toast.LENGTH_SHORT ).show()
-                    }
-                },
-                enabled = allFilled,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp)
+            AnimatedVisibility(
+                visible = allFilled,
+                enter = slideInHorizontally(initialOffsetX = {it }),
+                exit = fadeOut()
             ) {
-                Text("Register", style = TextStyle(fontFamily = bubbleFont))
+                CloudButton(
+                    text = "Register",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    onClick = {
+                        val ok = validateAll()
+                        if(ok) {
+                            viewModel.registerParent(
+                                parentFN.trim(),
+                                parentLN.trim(),
+                                parentDOB.trim(),
+                                email.trim(),
+                                password.trim(),
+                                childFN.trim(),
+                                childLN.trim(),
+                                childDOB.trim()
+                            ){ id ->
+                                if(id != null){
+                                    Toast.makeText(context, "Registered Successfully", Toast.LENGTH_SHORT).show()
+                                    navController.navigate("pick_user_screen"){
+                                        popUpTo("parent_registration_screen")
+                                    }
+                                }
+                            }
+
+                        }else{
+                            Toast.makeText(context, "Please fix errors", Toast.LENGTH_SHORT ).show()
+                        }
+                    })
             }
+
 
         }
     }

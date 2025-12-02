@@ -40,7 +40,7 @@ fun Navigation(){
         }
 
         composable("child_login_screen") {
-            ChildLoginScreen(navController)
+            ChildLoginScreen(navController, authViewModel)
         }
 
         composable("parent_login_screen") {
@@ -52,7 +52,7 @@ fun Navigation(){
         }
 
         composable("child_registration_screen") {
-            ChildRegistrationScreen(navController)
+            ChildRegistrationScreen(navController, authViewModel)
         }
 
     }

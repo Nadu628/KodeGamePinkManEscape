@@ -1,5 +1,7 @@
 package com.individual_project3.kodegame.ui.authentication.parentAuthentication
 
+import android.app.DatePickerDialog
+import android.content.Context
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -32,21 +34,20 @@ import java.util.Locale
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.individual_project3.kodegame.data.model.Child
-import com.individual_project3.kodegame.data.model.Parent
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
 import com.individual_project3.kodegame.ui.authentication.CloudButton
 import com.individual_project3.kodegame.ui.theme.CloudTextField
+
+
 
 @Composable
 fun ParentRegistrationScreen(
@@ -85,23 +86,26 @@ fun ParentRegistrationScreen(
     val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.US)
 
     //helper to show DatePickerDialog and return formatted date
-    fun showDatePicker(initialText: String?, onDateSelected: (String)-> Unit){
+    fun showDatePicker(
+        context: Context,
+        initialText: String?,
+        onDateSelected: (String) -> Unit
+    ) {
         val now = Calendar.getInstance()
-        val initDate = try{
-            //try to parse existing text to use as initial date in the picker
-            if(!initialText.isNullOrBlank()){
+        val initDate = try {
+            if (!initialText.isNullOrBlank()) {
                 val parsed = LocalDate.parse(initialText, formatter)
-                Calendar.getInstance().apply{
+                Calendar.getInstance().apply {
                     set(parsed.year, parsed.monthValue - 1, parsed.dayOfMonth)
                 }
-            }else now
-        }catch(e:Exception){
+            } else now
+        } catch (e: Exception) {
             now
         }
 
-        //create and show platform DatePickerDialog
-        val dpd = android.app.DatePickerDialog(
+        val dpd = DatePickerDialog(
             context,
+            R.style.SpinnerDatePickerDialogTheme,
             { _, year, month, dayOfMonth ->
                 val picked = LocalDate.of(year, month + 1, dayOfMonth)
                 onDateSelected(picked.format(formatter))
@@ -111,7 +115,9 @@ fun ParentRegistrationScreen(
             initDate.get(Calendar.DAY_OF_MONTH)
         )
         dpd.show()
+
     }
+
 
     //validation helpers
     fun isValidEmail(value: String) = value.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(value).matches()
@@ -269,10 +275,14 @@ fun ParentRegistrationScreen(
                 isError = parentDOBError != null,
                 errorText = parentDOBError,
                 trailingIcon = {
-                    IconButton(onClick = {showDatePicker(parentDOB) {parentDOB = it} }) {
-                        Icon(painter = painterResource(id = android.R.drawable.ic_menu_my_calendar),
-                            contentDescription = "pick date")
+                    IconButton(onClick = {
+                        showDatePicker(context, parentDOB) { picked ->
+                            parentDOB = picked
+                        }
+                    }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Pick date")
                     }
+
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
@@ -320,11 +330,14 @@ fun ParentRegistrationScreen(
                 isError = childDOBError != null,
                 errorText = childDOBError,
                 trailingIcon = {
-                    IconButton(
-                        onClick = {showDatePicker(childDOB) {childDOB = it}}) {
-                        Icon(painter = painterResource(id = android.R.drawable.ic_menu_my_calendar),
-                            contentDescription = "pick date")
+                    IconButton(onClick = {
+                        showDatePicker(context, childDOB) { picked ->
+                            childDOB = picked
+                        }
+                    }) {
+                        Icon(Icons.Default.DateRange, contentDescription = "Pick date")
                     }
+
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth()
@@ -397,8 +410,11 @@ fun ParentRegistrationScreen(
                                 if(id != null){
                                     Toast.makeText(context, "Registered Successfully", Toast.LENGTH_SHORT).show()
                                     navController.navigate("pick_user_screen"){
-                                        popUpTo("parent_registration_screen")
+                                        popUpTo("splash_screen"){inclusive = true}
+                                        launchSingleTop = true
                                     }
+                                    navController.currentBackStackEntry?.savedStateHandle?.set("fromRegister", true)
+
                                 }
                             }
 
@@ -406,8 +422,13 @@ fun ParentRegistrationScreen(
                             Toast.makeText(context, "Please fix errors", Toast.LENGTH_SHORT ).show()
                         }
                     })
-            }
 
+
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            CloudButton("Back") {
+                navController.popBackStack()
+            }
 
         }
     }

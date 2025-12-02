@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.Dp
 import kotlin.math.roundToInt
 import com.individual_project3.kodegame.R
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun JumpSequence(
@@ -57,41 +58,34 @@ fun JumpSequence(
             spikeOffset.snapTo(screenWidthPx + spikeSizePx) // off-screen right
             isJumping = false
             characterY.snapTo(0f)
+
             spikeOffset.animateTo(
                 targetValue = -spikeSizePx,
                 animationSpec = tween(durationMillis = travelMs, easing = LinearEasing)
-            )
+            ){
+                if(value <= centerX && !isJumping){
+                    isJumping = true
+                    onSpikeNearCenter?.invoke()
+
+                    // animate character Y up then down (visual jump inside JumpSequence)
+                    launch{
+                        characterY.animateTo(
+                            targetValue = -40f, // jump up (px) — tune to match your assets
+                            animationSpec = tween(durationMillis = 280, easing = FastOutLinearInEasing)
+                        )
+                        characterY.animateTo(
+                            targetValue = 0f, // land
+                            animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)
+                        )
+                        isJumping = false
+                    }
+                }
+            }
+
             delay(450) // pause between spikes
         }
     }
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            while (spikeOffset.value > centerX + 12f) {
-                delay(16)
-            }
-            isJumping = true
-            onSpikeNearCenter?.invoke()
-
-            // animate character Y up then down (visual jump inside JumpSequence)
-            characterY.animateTo(
-                targetValue = -40f, // jump up (px) — tune to match your assets
-                animationSpec = tween(durationMillis = 280, easing = FastOutLinearInEasing)
-            )
-            characterY.animateTo(
-                targetValue = 0f, // land
-                animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing)
-            )
-
-            while (spikeOffset.value >= centerX - 12f) {
-                delay(16)
-            }
-
-            isJumping = false
-            // allow a short cooldown before next detection
-            delay(150)
-        }
-    }
 
     //cycling for jump frames
     var frameIndex by remember { mutableStateOf(0) }

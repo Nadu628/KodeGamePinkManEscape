@@ -1,5 +1,6 @@
 package com.individual_project3.kodegame.data.repository
 
+import android.util.Log
 import com.individual_project3.kodegame.data.db.AuthDao
 import com.individual_project3.kodegame.data.model.Child
 import com.individual_project3.kodegame.data.model.Parent
@@ -19,15 +20,17 @@ class AuthRepository(private val dao: AuthDao){
     suspend fun registerParent(firstName: String, lastName: String, dob: String,
                                email: String, passwordPlain: String, childFN: String,
                                childLN: String, childDOB: String): Long {
+        Log.d("Auth", "Registering parent: email=$email, hash=${hashPassword(passwordPlain.trim())}")
+        val hashed = hashPassword(passwordPlain.trim())
         val parent = Parent(
-            firstName = firstName,
-            lastName = lastName,
-            dob = dob,
-            email = email,
-            passwordHash = hashPassword(passwordPlain),
-            childFirstName = childFN,
-            childLastName = childLN,
-            childDOB = childDOB
+            firstName = firstName.trim(),
+            lastName = lastName.trim(),
+            dob = dob.trim(),
+            email = email.trim(),
+            passwordHash = hashed,
+            childFirstName = childFN.trim(),
+            childLastName = childLN.trim(),
+            childDOB = childDOB.trim()
         )
         return dao.insertParent(parent)
     }
@@ -35,13 +38,14 @@ class AuthRepository(private val dao: AuthDao){
     //child register -> must select parent
     suspend fun registerChild(parentId: Long, firstName: String, lastName: String,
                               dob: String, username: String, passwordPlain: String): Long {
+        val hashed = hashPassword(passwordPlain.trim())
         val child = Child(
             parentId = parentId,
-            firstName = firstName,
-            lastName = lastName,
-            dob = dob,
-            username = username,
-            passwordHash = hashPassword(passwordPlain)
+            firstName = firstName.trim(),
+            lastName = lastName.trim(),
+            dob = dob.trim(),
+            username = username.trim(),
+            passwordHash = hashed
         )
         return dao.insertChild(child)
     }
@@ -53,15 +57,16 @@ class AuthRepository(private val dao: AuthDao){
 
     //parent login: find parent by email and verify hashed password
     suspend fun loginParent(email: String, passwordPlain: String): Parent?{
-        val parent = dao.findParentByEmail(email) ?: return null
-        val hashed = hashPassword(passwordPlain)
+        val parent = dao.findParentByEmail(email.trim()) ?: return null
+        val hashed = hashPassword(passwordPlain.trim())
+        Log.d("Auth", "Login attempt: email=$email, enteredHash=$hashed, storedHash=${parent.passwordHash}")
         return if (parent.passwordHash == hashed) parent else null
     }
 
     //child login: find child by username and password
     suspend fun loginChild(username: String, passwordPlain: String): Child?{
-        val child = dao.findChildByUsername(username) ?: return null
-        val hashed = hashPassword(passwordPlain)
+        val child = dao.findChildByUsername(username.trim()) ?: return null
+        val hashed = hashPassword(passwordPlain.trim())
         return if(child.passwordHash == hashed) child else null
     }
 

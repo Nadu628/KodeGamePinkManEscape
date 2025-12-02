@@ -162,6 +162,11 @@ fun ParentLoginScreen(navController: NavController,
             CloudButton("Register") {
                 navController.navigate("parent_registration_screen")
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            CloudButton("Back") {
+                navController.popBackStack()
+            }
         }
     }
 

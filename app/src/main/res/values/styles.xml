@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom DatePicker theme -->
+    <style name="SpinnerDatePickerDialogTheme" parent="Theme.MaterialComponents.DayNight.Dialog.Alert">
+        <!-- Force spinner mode instead of calendar -->
+        <item name="android:datePickerMode">spinner</item>
+    </style>
+
+</resources>

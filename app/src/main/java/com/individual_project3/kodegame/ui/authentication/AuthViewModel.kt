@@ -1,6 +1,7 @@
 package com.individual_project3.kodegame.ui.authentication
 
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.individual_project3.kodegame.data.repository.AuthRepository
@@ -43,7 +44,7 @@ class AuthViewModel(
                     lastName = parentLast,
                     dob = parentDob,
                     email = email,
-                    passwordPlain = password,
+                    passwordPlain = password.trim(),
                     childFN = childFirst,
                     childLN = childLast,
                     childDOB = childDob
@@ -62,11 +63,12 @@ class AuthViewModel(
 
     //parent login flow: verify credentials and persist session on success
     fun loginParent(email: String, password: String, onComplete: (Long?) -> Unit){
+        Log.d("Auth", "ViewModel loginParent: email='${email.trim()}', password='${password.trim()}'")
         viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             try {
-                val parent = repo.loginParent(email, password)
+                val parent = repo.loginParent(email.trim(), password.trim())
                 if(parent != null){
                     sessionManager.setCurrentParentId(parent.id)
                     onComplete(parent.id)
@@ -115,7 +117,12 @@ class AuthViewModel(
             _error.value = null
             try{
                 val childId = repo.registerChild(
-                    parentId, first, last, dob, username, password
+                    parentId,
+                    first,
+                    last,
+                    dob,
+                    username,
+                    password.trim()
                 )
                 onComplete(childId)
             }catch(e: Exception){
@@ -132,7 +139,7 @@ class AuthViewModel(
             _isLoading.value = true
             _error.value = null
             try {
-                val child = repo.loginChild(username, password)
+                val child = repo.loginChild(username.trim(), password.trim())
                 if(child != null){
                     sessionManager.setCurrentParentId(child.parentId)
                     sessionManager.setCurrentChildId(child.id)

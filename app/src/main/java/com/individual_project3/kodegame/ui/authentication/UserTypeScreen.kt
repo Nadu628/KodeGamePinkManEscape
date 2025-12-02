@@ -1,17 +1,21 @@
 package com.individual_project3.kodegame.ui.authentication
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -22,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,7 +39,6 @@ import androidx.navigation.NavController
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.ui.splash.JumpSequence
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.time.delay
 
 @Composable
 fun UserTypeScreen(navController: NavController,
@@ -47,19 +51,39 @@ fun UserTypeScreen(navController: NavController,
 
     var userPicked by remember{mutableStateOf(false)}
     var showButtons by remember { mutableStateOf(false) }
+    //reset spikes
+    var spikesActive by rememberSaveable {mutableStateOf(true) }
+
+    //flag to detect if come back from registration
+    val backStackEntry = navController.currentBackStackEntry
+    val cameback = navController.currentBackStackEntry
+        ?.savedStateHandle
+        ?.get<Boolean>("fromRegister") ?: false
+
+    //drop-down animation
+    var playDrop by remember { mutableStateOf(cameback) }
+    val dropOffsetY by animateDpAsState(
+        targetValue = if(playDrop) 40.dp else 0.dp,
+        animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+        label = "characterdrop"
+    )
 
     LaunchedEffect(Unit) {
+        showButtons = false
         delay(300)
         showButtons = true
     }
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(brush = gradient)
+            .background(brush = gradient),
+        contentAlignment = Alignment.Center
     ) {
         //background animation (spikes and jump)
         if(!userPicked){
-            JumpSequence(isVisible = true)
+            JumpSequence(isVisible = true, spikeYdp = 300.dp)
         }
         //make character stay at the top
         Box(modifier=Modifier
@@ -72,7 +96,7 @@ fun UserTypeScreen(navController: NavController,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(horizontal = 32.dp, vertical = 80.dp),
-                verticalArrangement = Arrangement.Bottom,
+                verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
@@ -84,16 +108,20 @@ fun UserTypeScreen(navController: NavController,
                 )
                 AnimatedVisibility(
                     visible = showButtons,
-                    enter = slideInHorizontally(initialOffsetX = {-300})
+                    enter = slideInHorizontally { full -> full } + fadeIn(),
+                    exit = slideOutHorizontally { full -> full } + fadeOut()
                 ) {
                     CloudButton("I am a Child"){
                         navController.navigate("child_login_screen")
                     }
                 }
 
+                Spacer(modifier = Modifier.height(12.dp))
+
                 AnimatedVisibility(
                     visible = showButtons,
-                    enter = slideInHorizontally(initialOffsetX={300})
+                    enter = slideInHorizontally { full -> full } + fadeIn(),
+                    exit = slideOutHorizontally { full -> full } + fadeOut()
                 ) {
                     CloudButton("I am a Parent"){
                         navController.navigate("parent_login_screen")

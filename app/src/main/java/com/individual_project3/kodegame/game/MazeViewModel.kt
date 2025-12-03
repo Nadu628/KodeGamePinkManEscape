@@ -1,6 +1,5 @@
 package com.individual_project3.kodegame.game
 
-
 import android.content.Context
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -8,76 +7,76 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.individual_project3.kodegame.assets.audio.AudioManager
+import com.individual_project3.kodegame.assets.commands.Command
+import com.individual_project3.kodegame.assets.commands.CommandEngine
+import com.individual_project3.kodegame.assets.commands.Commands
+import com.individual_project3.kodegame.assets.commands.ExecEvent
+import com.individual_project3.kodegame.assets.commands.Maze
+import com.individual_project3.kodegame.assets.commands.Pos
 import com.individual_project3.kodegame.game.*
-import kotlinx.coroutines.Dispatchers
+import com.individual_project3.kodegame.assets.commands.PlayerState
+import com.individual_project3.kodegame.R
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
+enum class PlayerAnimState { Idle, Run, Jump, Drop, Hit }
+
 class MazeViewModel(
-    private val mazeModel: MazeModel = MazeModel(),
+    private val mazeModel: MazeModel,
     private val audioManager: AudioManager
 ) : ViewModel() {
 
-    // Current maze being played
     val currentMaze = mutableStateOf<Maze?>(null)
-
-    // Player state used by the CommandEngine and UI
     val playerState = mutableStateOf<PlayerState?>(null)
-
-    // Execution log and events for UI display
     val execLog = mutableStateListOf<String>()
-
-    // Whether a program is currently running
     val isProgramRunning = mutableStateOf(false)
-
-    // Loading state while generating a level
     val isLoading = mutableStateOf(false)
 
-    // Job for the currently running CommandEngine program (so we can cancel)
+    // CHANGED: expose animation state so UI can pick frames
+    val playerAnimState = mutableStateOf(PlayerAnimState.Idle)
+
+    var lastProgram: List<Command> = emptyList()
+        private set
+
     private var programJob: Job? = null
+    private var animResetJob: Job? = null // CHANGED: job to cancel pending animation resets
 
-    // The last used level number
-    private var lastLevel = 0
+    class Factory(private val context: Context) : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+            val audio = AudioManager(context.applicationContext)
+            val model = MazeModel()
+            @Suppress("UNCHECKED_CAST")
+            return MazeViewModel(model, audio) as T
+        }
+    }
 
-    // Generate the next level asynchronously
+    fun parseProgramFromText(text: String): List<Command> = Commands.parseProgram(text)
+
+    fun setLastProgram(program: List<Command>) {
+        lastProgram = program
+        appendLog("Program set (${program.size} commands)")
+    }
+
+    fun runLastProgram() {
+        if (lastProgram.isEmpty()) { appendLog("No program set"); return }
+        runProgram(lastProgram)
+    }
+
     fun generateNextLevel(mode: DifficultyMode = DifficultyMode.EASY) {
         isLoading.value = true
         viewModelScope.launch {
-            // Generate level off the UI thread inside MazeModel (MazeModel should be synchronous but fast;
-            // if it is heavy, consider exposing a suspend generator or run on Dispatchers.Default)
-            val level = mazeModel.nextLevel(mode)
-            // Convert MazeLevel -> Maze (your CommandEngine expects Maze). If your MazeModel returns MazeGrid,
-            // adapt this conversion to produce the Maze data class used by CommandEngine.
+            val level = withContext(kotlinx.coroutines.Dispatchers.Default) { mazeModel.nextLevel(mode) }
             val maze = convertMazeLevelToMaze(level)
             currentMaze.value = maze
-            // Initialize player at maze.start
-            val start = maze.start
-            playerState.value = PlayerState(pos = start, strawberries = 0, startPos = start)
+            playerState.value = PlayerState(pos = maze.start, strawberries = 0, startPos = maze.start)
             execLog.clear()
             isLoading.value = false
-            lastLevel++
         }
     }
 
-    // Generate a specific level number
-    fun generateLevel(levelNumber: Int, mode: DifficultyMode = DifficultyMode.EASY) {
-        isLoading.value = true
-        viewModelScope.launch {
-            val level = mazeModel.level(levelNumber, mode)
-            val maze = convertMazeLevelToMaze(level)
-            currentMaze.value = maze
-            val start = maze.start
-            playerState.value = PlayerState(pos = start, strawberries = 0, startPos = start)
-            execLog.clear()
-            isLoading.value = false
-            lastLevel = levelNumber
-        }
-    }
-
-    // Convert MazeLevel (from MazeModel) to the Maze data class used by CommandEngine
-    // CHANGED: adapt mapping to your Maze/MazeGrid structure. This example maps TileType.REWARD -> strawberries,
-    // TileType.WALL -> walls, and enemies/collectibles from MazeLevel.
     private fun convertMazeLevelToMaze(level: MazeLevel): Maze {
         val grid = level.grid
         val walls = mutableSetOf<Pos>()
@@ -87,13 +86,12 @@ class MazeViewModel(
             for (c in 0 until grid.width) {
                 when (grid.tileAt(r, c)) {
                     TileType.WALL -> walls.add(Pos(c, r))
+                    TileType.HAZARD -> enemies.add(Pos(c, r))
                     TileType.REWARD -> strawberries.add(Pos(c, r))
-                    TileType.HAZARD -> enemies.add(Pos(c, r)) // treat hazards as enemies for engine
-                    else -> { /* PATH, START, EXIT ignored here */ }
+                    else -> {}
                 }
             }
         }
-        // find start and goal positions
         val startPair = grid.indexOfStart()
         val exitPair = grid.indexOfExit()
         val startPos = startPair?.let { Pos(it.second, it.first) } ?: Pos(0, 0)
@@ -109,22 +107,11 @@ class MazeViewModel(
         )
     }
 
-    // Start running a program (list of Command) using CommandEngine
-    // Cancels any previously running program
     fun runProgram(program: List<Command>, stepDelayMs: Long = 350L) {
-        val maze = currentMaze.value ?: run {
-            appendLog("No maze loaded")
-            return
-        }
-        val player = playerState.value ?: run {
-            appendLog("No player state")
-            return
-        }
+        val maze = currentMaze.value ?: run { appendLog("No maze loaded"); return }
+        val player = playerState.value ?: run { appendLog("No player state"); return }
 
-        // Cancel previous run if active
         programJob?.cancel()
-
-        // Create engine for this maze
         val engine = CommandEngine(maze)
 
         isProgramRunning.value = true
@@ -136,12 +123,10 @@ class MazeViewModel(
             scope = viewModelScope,
             stepDelayMs = stepDelayMs
         ) { event ->
-            // This callback is invoked on Main by the engine (see engine implementation)
             handleExecEvent(event)
         }
     }
 
-    // Cancel the currently running program
     fun cancelProgram() {
         programJob?.cancel()
         programJob = null
@@ -149,24 +134,45 @@ class MazeViewModel(
         appendLog("Program cancelled")
     }
 
-    // Handle ExecEvent updates from CommandEngine
     private fun handleExecEvent(event: ExecEvent) {
         when (event) {
             is ExecEvent.Started -> {
                 appendLog("Execution started at ${event.initial.pos}")
+                playerAnimState.value = PlayerAnimState.Idle
             }
+
             is ExecEvent.Step -> {
-                // update player position and strawberries
+                val prev = playerState.value?.pos
+                val newPos = event.newPos
                 val ps = playerState.value
                 if (ps != null) {
-                    ps.pos = event.newPos
+                    ps.pos = newPos
                     ps.strawberries = event.strawberries
                     playerState.value = ps
                 } else {
-                    playerState.value = PlayerState(event.newPos, event.strawberries, event.newPos)
+                    playerState.value = PlayerState(newPos, event.strawberries, newPos)
                 }
+
+                // CHANGED: determine animation and play jump/drop sounds
+                val dy = if (prev != null) newPos.y - prev.y else 0
+                when {
+                    dy < 0 -> { // moved up -> jump
+                        setPlayerAnimStateWithTimeout(PlayerAnimState.Jump, revertTo = PlayerAnimState.Run, timeoutMs = 300L)
+                        audioManager.play(R.raw.sfx_jump)
+                    }
+                    dy > 0 -> { // moved down -> drop
+                        setPlayerAnimStateWithTimeout(PlayerAnimState.Drop, revertTo = PlayerAnimState.Run, timeoutMs = 300L)
+                        audioManager.play(R.raw.sfx_drop)
+                    }
+                    else -> {
+                        // horizontal move -> brief run animation
+                        setPlayerAnimStateWithTimeout(PlayerAnimState.Run, revertTo = PlayerAnimState.Idle, timeoutMs = 250L)
+                    }
+                }
+
                 appendLog("Step to ${event.newPos} (strawberries=${event.strawberries})")
             }
+
             is ExecEvent.CollectedStrawberry -> {
                 val ps = playerState.value
                 if (ps != null) {
@@ -175,8 +181,10 @@ class MazeViewModel(
                     playerState.value = ps
                 }
                 appendLog("Collected strawberry at ${event.pos} (total=${event.strawberries})")
-                // TODO play collect sound via AudioManager if injected
+                audioManager.play(R.raw.sfx_collecting_fruit)
+                setPlayerAnimStateWithTimeout(PlayerAnimState.Run, revertTo = PlayerAnimState.Idle, timeoutMs = 300L)
             }
+
             is ExecEvent.HitEnemyConsumedLife -> {
                 val ps = playerState.value
                 if (ps != null) {
@@ -185,7 +193,10 @@ class MazeViewModel(
                     playerState.value = ps
                 }
                 appendLog("Hit enemy at ${event.pos}, lost a strawberry (left=${event.strawberriesLeft})")
+                audioManager.play(R.raw.sfx_hit)
+                setPlayerAnimStateWithTimeout(PlayerAnimState.Hit, revertTo = PlayerAnimState.Idle, timeoutMs = 600L)
             }
+
             is ExecEvent.HitEnemyNoLifeReset -> {
                 val ps = playerState.value
                 if (ps != null) {
@@ -193,77 +204,46 @@ class MazeViewModel(
                     playerState.value = ps
                 }
                 appendLog("Hit enemy with no strawberries, reset to ${event.resetTo}")
+                audioManager.play(R.raw.sfx_hit)
+                setPlayerAnimStateWithTimeout(PlayerAnimState.Hit, revertTo = PlayerAnimState.Idle, timeoutMs = 600L)
             }
+
             is ExecEvent.Success -> {
                 appendLog("Level success at ${event.pos}")
                 isProgramRunning.value = false
-                // Optionally auto-generate next level
+                audioManager.play(R.raw.sfx_success)
+                playerAnimState.value = PlayerAnimState.Idle
             }
-            is ExecEvent.Log -> {
-                appendLog("Log: ${event.message}")
-            }
+
+            is ExecEvent.Log -> appendLog("Log: ${event.message}")
+
             is ExecEvent.Finished -> {
                 appendLog("Execution finished")
                 isProgramRunning.value = false
+                playerAnimState.value = PlayerAnimState.Idle
             }
         }
     }
 
-    // Small helper to append to execLog
+
+    private fun setPlayerAnimStateWithTimeout(state: PlayerAnimState, revertTo: PlayerAnimState, timeoutMs: Long) {
+        animResetJob?.cancel()
+        playerAnimState.value = state
+        animResetJob = viewModelScope.launch {
+            delay(timeoutMs)
+            if (playerAnimState.value == state) playerAnimState.value = revertTo
+            animResetJob = null
+        }
+    }
+
     private fun appendLog(message: String) {
-        execLog.add(0, message) // newest first
-        // keep log size reasonable
+        execLog.add(0, message)
         if (execLog.size > 200) execLog.removeAt(execLog.lastIndex)
     }
 
-    // Convenience functions to move player manually (UI buttons)
-    fun movePlayerUp() = movePlayer(0, -1)
-    fun movePlayerDown() = movePlayer(0, 1)
-    fun movePlayerLeft() = movePlayer(-1, 0)
-    fun movePlayerRight() = movePlayer(1, 0)
-
-    private fun movePlayer(dx: Int, dy: Int) {
-        val maze = currentMaze.value ?: return
-        val ps = playerState.value ?: return
-        val newX = ps.pos.x + dx
-        val newY = ps.pos.y + dy
-        if (newX < 0 || newX >= maze.width || newY < 0 || newY >= maze.height) return
-        val candidate = Pos(newX, newY)
-        if (maze.walls.contains(candidate)) return
-        ps.pos = candidate
-        // collect if strawberry
-        if (maze.strawberries.contains(candidate)) {
-            ps.strawberries += 1
-            // Optionally remove strawberry from maze so it can't be recollected
-            val newStrawberries = maze.strawberries.toMutableSet().apply { remove(candidate) }
-            currentMaze.value = maze.copy(strawberries = newStrawberries)
-        }
-        // enemy handling
-        if (maze.enemies.contains(candidate)) {
-            if (ps.strawberries > 0) {
-                ps.strawberries -= 1
-            } else {
-                ps.pos = ps.startPos
-            }
-        }
-        playerState.value = ps
-    }
-
-    // Clean up when ViewModel is cleared
     override fun onCleared() {
         super.onCleared()
         programJob?.cancel()
+        animResetJob?.cancel()
     }
 }
-
-class MazeViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        // create dependencies here
-        val audioManager = AudioManager(context.applicationContext)
-        val mazeModel = MazeModel()
-
-        @Suppress("UNCHECKED_CAST")
-        return MazeViewModel(mazeModel, audioManager) as T
-    }
-}
-

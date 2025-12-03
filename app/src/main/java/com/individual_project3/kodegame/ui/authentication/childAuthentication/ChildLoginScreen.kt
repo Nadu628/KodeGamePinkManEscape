@@ -1,6 +1,5 @@
 package com.individual_project3.kodegame.ui.authentication.childAuthentication
 
-import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeOut
@@ -41,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
-import com.individual_project3.kodegame.ui.authentication.CloudButton
+import com.individual_project3.kodegame.ui.screens.CloudButton
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 
 @Composable

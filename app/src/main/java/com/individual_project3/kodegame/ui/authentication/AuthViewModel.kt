@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.individual_project3.kodegame.data.repository.AuthRepository
-import com.individual_project3.kodegame.data.DataStore
+import com.individual_project3.kodegame.data.db.DataStore
 import com.individual_project3.kodegame.data.model.Parent
 import com.individual_project3.kodegame.data.model.Child
 import kotlinx.coroutines.flow.MutableStateFlow

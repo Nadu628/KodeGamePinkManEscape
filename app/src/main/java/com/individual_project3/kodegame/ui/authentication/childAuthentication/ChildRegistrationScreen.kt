@@ -31,7 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.input.KeyboardType
 import com.individual_project3.kodegame.R
-import com.individual_project3.kodegame.ui.authentication.CloudButton
+import com.individual_project3.kodegame.ui.screens.CloudButton
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 import java.time.format.DateTimeParseException
 import java.util.Locale

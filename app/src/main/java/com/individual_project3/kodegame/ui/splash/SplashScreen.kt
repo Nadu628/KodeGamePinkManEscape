@@ -24,12 +24,11 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.text.style.TextAlign
 import kotlin.math.roundToInt
 import com.individual_project3.kodegame.R
 import androidx.navigation.NavController
-import com.individual_project3.kodegame.ui.authentication.CloudButton
+import com.individual_project3.kodegame.ui.screens.CloudButton
 
 
 

@@ -1,7 +1,5 @@
 package com.individual_project3.kodegame.ui.authentication.parentAuthentication
 
-import android.R.attr.enabled
-import android.graphics.Paint
 import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
@@ -43,10 +41,9 @@ import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import com.individual_project3.kodegame.ui.authentication.CloudButton
+import com.individual_project3.kodegame.ui.screens.CloudButton
 
 @Composable
 fun ParentLoginScreen(navController: NavController,

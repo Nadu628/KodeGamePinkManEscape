@@ -3,15 +3,14 @@ package com.individual_project3.kodegame.ui
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.individual_project3.kodegame.data.DataStore
+import com.individual_project3.kodegame.data.db.DataStore
 import com.individual_project3.kodegame.data.db.AppDatabase
 import com.individual_project3.kodegame.data.repository.AuthRepository
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
-import com.individual_project3.kodegame.ui.authentication.UserTypeScreen
+import com.individual_project3.kodegame.ui.screens.UserTypeScreen
 import com.individual_project3.kodegame.ui.authentication.childAuthentication.ChildLoginScreen
 import com.individual_project3.kodegame.ui.authentication.childAuthentication.ChildRegistrationScreen
 import com.individual_project3.kodegame.ui.authentication.parentAuthentication.ParentLoginScreen

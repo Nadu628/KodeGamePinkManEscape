@@ -1,4 +1,4 @@
-package com.individual_project3.kodegame.ui.authentication
+package com.individual_project3.kodegame.ui.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing

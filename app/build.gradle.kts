@@ -3,7 +3,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.serialization)
-    id("com.google.devtools.ksp")
+    id("com.google.devtools.ksp") version "1.9.10-1.0.13"
+
 }
 
 android {
@@ -13,7 +14,7 @@ android {
     defaultConfig {
         applicationId = "com.individual_project3.kodegame"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -43,22 +44,24 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.3"
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            pickFirst("META-INF/NOTICE.md")
+            pickFirst("META-INF/LICENSE.md")
+            pickFirst("META-INF/LICENSE-notice.md")
         }
     }
 }
 
 dependencies {
     implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.compose.material:material-icons-extended:<compose_version>")
+    implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.datastore:datastore-preferences:1.2.0")
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.material3.lint)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.core.ktx)

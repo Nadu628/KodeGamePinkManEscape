@@ -1,4 +1,4 @@
-package com.individual_project3.kodegame.data
+package com.individual_project3.kodegame.data.db
 
 import android.content.Context
 import androidx.datastore.preferences.core.stringPreferencesKey

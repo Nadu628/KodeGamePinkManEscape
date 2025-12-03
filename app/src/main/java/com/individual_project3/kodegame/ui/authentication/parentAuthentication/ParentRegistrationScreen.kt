@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
-import com.individual_project3.kodegame.ui.authentication.CloudButton
+import com.individual_project3.kodegame.ui.screens.CloudButton
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 
 

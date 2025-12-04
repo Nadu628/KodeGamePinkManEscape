@@ -31,7 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.input.KeyboardType
 import com.individual_project3.kodegame.R
-import com.individual_project3.kodegame.ui.screens.CloudButton
+import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 import java.time.format.DateTimeParseException
 import java.util.Locale
@@ -255,7 +255,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
 
             //parent dropbox
             Box{
-                CloudButton(
+                CloudButtonTwo(
                     text = selectedParent?.let{"Parent: ${it.firstName} ${it.lastName}"} ?: "Select Parent",
                     onClick = {expanded = true},
                     modifier = Modifier.fillMaxWidth()
@@ -321,7 +321,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                 enter = slideInHorizontally(initialOffsetX = {it }),
                 exit = fadeOut()
             ) {
-                CloudButton(
+                CloudButtonTwo(
                     text = "Register",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -344,7 +344,10 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                                             "Child Registered",
                                             Toast.LENGTH_SHORT
                                         ).show()
-                                        navController.navigate("child_login_screen")
+                                        navController.navigate("child_login_screen") {
+                                            popUpTo("child_registration_screen") { inclusive = true }
+                                            launchSingleTop = true
+                                        }
                                     } else {
                                         Toast.makeText(
                                             context,
@@ -358,7 +361,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                         }
                     })
                 Spacer(modifier = Modifier.height(12.dp))
-                CloudButton("Back") {
+                CloudButtonTwo("Back") {
                     navController.popBackStack()
                 }
             }

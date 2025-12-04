@@ -62,6 +62,8 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.2.0")
     implementation(libs.androidx.lifecycle.livedata.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.animation)
+    implementation(libs.material3)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.core.ktx)

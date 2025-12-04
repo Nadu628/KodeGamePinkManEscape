@@ -13,14 +13,12 @@ enum class TileType { WALL, PATH, START, EXIT, HAZARD, REWARD }
 data class MazeGrid(
     val width: Int,
     val height: Int,
-    val tiles: List<TileType> // tiles[row * width + col]
+    val tiles: List<TileType>
 ) {
     fun tileAt(row: Int, col: Int): TileType {
-        require(row in 0 until height && col in 0 until width) { "Out of bounds" }
         return tiles[row * width + col]
     }
 
-    //returns start of tile
     fun indexOfStart(): Pair<Int, Int>? {
         for (r in 0 until height) {
             for (c in 0 until width) {
@@ -30,7 +28,6 @@ data class MazeGrid(
         return null
     }
 
-    // Returns exit tile or null if none
     fun indexOfExit(): Pair<Int, Int>? {
         for (r in 0 until height) {
             for (c in 0 until width) {
@@ -39,8 +36,9 @@ data class MazeGrid(
         }
         return null
     }
-
 }
+
+
 
 // Level bundle
 data class MazeLevel(
@@ -65,21 +63,21 @@ data class DifficultyParams(
 
 // Plans learning concepts per level
 object LearningGoalPlanner {
-    fun goalsFor(level: Int, mode: DifficultyMode): List<LearningConcept> {
-        return when (mode) {
-            DifficultyMode.EASY -> listOf(
-                LearningConcept.VARIABLES,
-                LearningConcept.LOOPS,
-                LearningConcept.CONDITIONALS
-            ).shuffled().take(if (level % 3 == 0) 3 else 2)
 
-            DifficultyMode.HARD -> listOf(
-                LearningConcept.FUNCTIONS,
-                LearningConcept.LOOPS,
-                LearningConcept.CONDITIONALS,
-                LearningConcept.DEBUGGING
-            ).shuffled().take(3)
+    fun goalsFor(level: Int, mode: DifficultyMode, seed: Long): List<LearningConcept> {
+        val rnd = Random(seed)
+
+        val pool = when (mode) {
+            DifficultyMode.EASY ->
+                listOf(LearningConcept.LOOPS, LearningConcept.CONDITIONALS, LearningConcept.VARIABLES)
+            DifficultyMode.HARD ->
+                listOf(LearningConcept.FUNCTIONS, LearningConcept.LOOPS,
+                    LearningConcept.CONDITIONALS, LearningConcept.DEBUGGING)
         }
+
+        val take = if (mode == DifficultyMode.EASY && level % 3 != 0) 2 else 3
+
+        return pool.shuffled(rnd).take(take)
     }
 }
 
@@ -137,13 +135,13 @@ class MazeModel(
     }
 
     private fun generateLevel(level: Int, mode: DifficultyMode, seed: Long): MazeLevel {
-        val params = DifficultyParamFactory.create(level, mode)
-        val concepts = LearningGoalPlanner.goalsFor(level, mode)
 
-        // Generate topology from the separate generator
+        val params = DifficultyParamFactory.create(level, mode)
+
+        val concepts = LearningGoalPlanner.goalsFor(level, mode, seed)
+
         val grid = MazeGenerator.generate(params, seed, concepts)
 
-        // Spawn entities
         val enemies = EnemySpawner.spawn(grid, params, seed)
         val collectibles = CollectibleSpawner.spawn(grid, params, seed, concepts)
 
@@ -156,6 +154,7 @@ class MazeModel(
             collectibles = collectibles
         )
     }
+
 }
 
 // Enemy placement
@@ -190,49 +189,32 @@ object EnemySpawner {
 
 // Collectibles placement using learning concepts
 object CollectibleSpawner {
+
     fun spawn(
         grid: MazeGrid,
         params: DifficultyParams,
         seed: Long,
         concepts: List<LearningConcept>
     ): List<Collectible> {
-        val rnd = Random(seed xor 0xC011EC7)
-        val items = mutableListOf<Collectible>()
-        val targetCount = if (LearningConcept.LOOPS in concepts) 6 else 3
 
-        var placed = 0
-        for (r in 1 until grid.height - 1) {
-            for (c in 1 until grid.width - 1) {
-                if (grid.tileAt(r, c) == TileType.REWARD && placed < targetCount) {
-                    items.add(
-                        Collectible(
-                            row = r,
-                            col = c,
-                            type = CollectibleType.STRAWBERRY,
-                            points = 10
-                        )
-                    )
-                    placed++
-                }
+        val rnd = Random(seed xor 0xC0FFEE)
+        val out = mutableListOf<Collectible>()
+
+        val needed = if (LearningConcept.LOOPS in concepts) 6 else 3
+
+        var attempts = 0
+        val maxAttempts = 5000
+
+        while (out.size < needed && attempts < maxAttempts) {
+            attempts++
+            val r = rnd.nextInt(grid.height)
+            val c = rnd.nextInt(grid.width)
+
+            if (grid.tileAt(r, c) == TileType.PATH) {
+                out += Collectible(r, c, CollectibleType.STRAWBERRY, points = 5)
             }
         }
 
-        while (placed < targetCount) {
-            val rr = rnd.nextInt(1, grid.height - 1)
-            val cc = rnd.nextInt(1, grid.width - 1)
-            if (grid.tileAt(rr, cc) == TileType.PATH) {
-                items.add(
-                    Collectible(
-                        row = rr,
-                        col = cc,
-                        type = CollectibleType.STRAWBERRY,
-                        points = 5
-                    )
-                )
-                placed++
-            }
-        }
-
-        return items
+        return out
     }
 }

@@ -44,7 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
-import com.individual_project3.kodegame.ui.screens.CloudButton
+import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
+import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 
 
@@ -389,7 +390,7 @@ fun ParentRegistrationScreen(
                 enter = slideInHorizontally(initialOffsetX = {it }),
                 exit = fadeOut()
             ) {
-                CloudButton(
+                CloudButtonTwo(
                     text = "Register",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -407,15 +408,14 @@ fun ParentRegistrationScreen(
                                 childLN.trim(),
                                 childDOB.trim()
                             ){ id ->
-                                if(id != null){
+                                if (id != null) {
                                     Toast.makeText(context, "Registered Successfully", Toast.LENGTH_SHORT).show()
-                                    navController.navigate("pick_user_screen"){
-                                        popUpTo("splash_screen"){inclusive = true}
+                                    navController.navigate("parent_login_screen") {
+                                        popUpTo("parent_registration_screen") { inclusive = true }
                                         launchSingleTop = true
                                     }
-                                    navController.currentBackStackEntry?.savedStateHandle?.set("fromRegister", true)
-
                                 }
+
                             }
 
                         }else{
@@ -426,7 +426,7 @@ fun ParentRegistrationScreen(
 
             }
             Spacer(modifier = Modifier.height(12.dp))
-            CloudButton("Back") {
+            CloudButtonTwo("Back") {
                 navController.popBackStack()
             }
 

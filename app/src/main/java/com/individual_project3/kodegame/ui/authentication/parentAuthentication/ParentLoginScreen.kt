@@ -43,7 +43,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import com.individual_project3.kodegame.ui.screens.CloudButton
+import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 
 @Composable
 fun ParentLoginScreen(navController: NavController,
@@ -143,7 +143,7 @@ fun ParentLoginScreen(navController: NavController,
                 enter = slideInHorizontally(initialOffsetX =  {it  }),
                 exit = fadeOut()
             ) {
-                CloudButton("Login") {
+                CloudButtonTwo("Login") {
                     viewModel.loginParent(email, password){id ->
                         if(id != null){
                             navController.navigate("parent_progress_screen")
@@ -156,13 +156,13 @@ fun ParentLoginScreen(navController: NavController,
 
 
             Spacer(modifier = Modifier.height(12.dp))
-            CloudButton("Register") {
+            CloudButtonTwo("Register") {
                 navController.navigate("parent_registration_screen")
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            CloudButton("Back") {
-                navController.popBackStack()
+            CloudButtonTwo("Back") {
+                navController.navigate("pick_user_screen")
             }
         }
     }

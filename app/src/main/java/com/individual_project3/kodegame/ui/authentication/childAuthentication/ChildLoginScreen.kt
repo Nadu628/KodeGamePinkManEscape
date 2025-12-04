@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
-import com.individual_project3.kodegame.ui.screens.CloudButton
+import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 
 @Composable
@@ -131,7 +131,7 @@ fun ChildLoginScreen(navController: NavController,
                 enter = slideInHorizontally(initialOffsetX =  {it  }),
                 exit = fadeOut()
             ) {
-                CloudButton("Login") {
+                CloudButtonTwo("Login") {
                     viewModel.loginChild(username, password){id ->
                         if(id != null){
                             navController.navigate("game_instructions_screen")
@@ -144,14 +144,15 @@ fun ChildLoginScreen(navController: NavController,
 
 
             Spacer(modifier = Modifier.height(12.dp))
-            CloudButton("Register") {
+            CloudButtonTwo("Register") {
                 navController.navigate("child_registration_screen")
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-            CloudButton("Back") {
+            CloudButtonTwo("Back") {
                 navController.popBackStack()
             }
+
 
         }
     }

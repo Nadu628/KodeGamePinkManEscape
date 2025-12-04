@@ -5,17 +5,27 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import com.individual_project3.kodegame.assets.commands.Maze
 import com.individual_project3.kodegame.assets.commands.PlayerState
 import com.individual_project3.kodegame.assets.commands.Pos
+import com.individual_project3.kodegame.ui.Navigation
 import com.individual_project3.kodegame.ui.screens.GameScreen
+import com.individual_project3.kodegame.ui.theme.KodeGameTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            GameScreen()
+            Navigation()
         }
 
+    }
+
+    @Composable
+    fun GameApp(){
+        MaterialTheme {
+            //GameScreen()
+        }
     }
 }

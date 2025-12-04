@@ -8,11 +8,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import com.individual_project3.kodegame.R
+import kotlinx.coroutines.isActive
 
 
 @Composable
@@ -30,20 +29,19 @@ fun RunningCharacter(
     var frameIndex by remember { mutableStateOf(0) }
 
     LaunchedEffect(isRunning) {
-        if (isRunning) {
-            // loop while running
-            while (true) {
-                delay(frameDelayMs)
-                frameIndex = (frameIndex + 1) % runFrames.size
-            }
-        } else {
-            // reset to first run frame when not running (so image is stable)
+        if (!isRunning) {
             frameIndex = 0
+            return@LaunchedEffect
+        }
+
+        while (isActive && isRunning) {
+            delay(frameDelayMs)
+            frameIndex = (frameIndex + 1) % runFrames.size
         }
     }
 
     Image(
-        painter = painterResource(id = runFrames[frameIndex % runFrames.size]),
+        painter = painterResource(id = runFrames[frameIndex]),
         contentDescription = "Running character",
         modifier = modifier
     )

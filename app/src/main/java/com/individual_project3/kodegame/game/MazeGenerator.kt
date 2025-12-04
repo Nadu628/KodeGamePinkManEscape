@@ -1,6 +1,7 @@
 package com.individual_project3.kodegame.game
 
 import kotlin.random.Random
+import java.util.ArrayDeque
 
 object MazeGenerator {
 
@@ -22,10 +23,11 @@ object MazeGenerator {
         fun idx(r: Int, c: Int) = r * w + c
         fun setPath(r: Int, c: Int) { tiles[idx(r, c)] = TileType.PATH }
 
-        // Start positions for even/odd dimensions
+        // Start carving from top-left-ish
         val startR = if (h % 2 == 0) 1 else 0
         val startC = if (w % 2 == 0) 1 else 0
 
+        // Helper: neighbors 2 steps away
         fun neighborsTwoSteps(cell: Cell): List<Cell> {
             val dirs = listOf(
                 Cell(cell.r - 2, cell.c),
@@ -36,7 +38,7 @@ object MazeGenerator {
             return dirs.filter { inBounds(it.r, it.c) }
         }
 
-        // Bias next carve by branchingFactor and deadEndFavor
+        // Weighted choice for DFS carving
         fun pickNext(stackTop: Cell): Cell? {
             val options = neighborsTwoSteps(stackTop).filter { tiles[idx(it.r, it.c)] == TileType.WALL }
             if (options.isEmpty()) return null
@@ -44,8 +46,7 @@ object MazeGenerator {
                 val around = neighborsTwoSteps(it).count { n -> tiles[idx(n.r, n.c)] == TileType.PATH }
                 val branchWeight = params.branchingFactor * (1 + around)
                 val deadEndWeight = params.deadEndFavor * (1 + (2 - around).coerceAtLeast(0))
-                val weight = branchWeight + deadEndWeight
-                it to weight
+                it to (branchWeight + deadEndWeight)
             }
             val sum = weighted.sumOf { it.second }
             val roll = rnd.nextDouble() * sum
@@ -83,20 +84,49 @@ object MazeGenerator {
                 if (tiles[idx(r, c)] == TileType.PATH) add(Cell(r, c))
         }
 
-        // Place START and EXIT on extremes
-        if (pathCells.isNotEmpty()) {
-            val start = pathCells.first()
-            val exit = pathCells.last()
-            tiles[idx(start.r, start.c)] = TileType.START
-            tiles[idx(exit.r, exit.c)] = TileType.EXIT
+        // Find farthest cell from starting point for better START/EXIT placement
+        fun bfsFarthest(start: Cell): Cell {
+            val visited = Array(h) { BooleanArray(w) { false } }
+            val queue = ArrayDeque<Pair<Cell, Int>>()
+            queue.add(start to 0)
+            visited[start.r][start.c] = true
+
+            var farthest = start
+            var maxDist = 0
+
+            while (queue.isNotEmpty()) {
+                val (current, dist) = queue.removeFirst()
+                if (dist > maxDist) {
+                    maxDist = dist
+                    farthest = current
+                }
+                val neighbors = listOf(
+                    Cell(current.r - 1, current.c),
+                    Cell(current.r + 1, current.c),
+                    Cell(current.r, current.c - 1),
+                    Cell(current.r, current.c + 1)
+                ).filter { inBounds(it.r, it.c) && !visited[it.r][it.c] && tiles[idx(it.r, it.c)] == TileType.PATH }
+
+                for (n in neighbors) {
+                    visited[n.r][n.c] = true
+                    queue.add(n to dist + 1)
+                }
+            }
+
+            return farthest
         }
+
+        // START and EXIT placement
+        val start = pathCells.firstOrNull() ?: Cell(startR, startC)
+        val exit = bfsFarthest(start)
+        tiles[idx(start.r, start.c)] = TileType.START
+        tiles[idx(exit.r, exit.c)] = TileType.EXIT
 
         // Sprinkle hazards and rewards
         fun sprinkle(type: TileType, density: Double) {
-            val candidates = pathCells.shuffled(rnd).filter {
-                val t = tiles[idx(it.r, it.c)]
-                t == TileType.PATH
-            }
+            val candidates = pathCells
+                .filter { tiles[idx(it.r, it.c)] == TileType.PATH && it != start && it != exit }
+                .shuffled(rnd)
             val count = (candidates.size * density).toInt()
             for (i in 0 until count) {
                 val cell = candidates[i]
@@ -104,7 +134,6 @@ object MazeGenerator {
             }
         }
 
-        // Concept-driven micro adjustments
         val hazardBoost = if (LearningConcept.CONDITIONALS in concepts) 0.01 else 0.0
         val rewardBoost = if (LearningConcept.LOOPS in concepts) 0.01 else 0.0
 

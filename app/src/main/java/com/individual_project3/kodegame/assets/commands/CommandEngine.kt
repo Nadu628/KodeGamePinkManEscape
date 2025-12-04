@@ -1,10 +1,10 @@
 package com.individual_project3.kodegame.assets.commands
-
 import com.individual_project3.kodegame.assets.commands.Direction
 import kotlinx.coroutines.*
 import kotlin.math.max
 
 data class Pos(val x: Int, val y: Int)
+
 data class Maze(
     val width: Int,
     val height: Int,
@@ -14,7 +14,12 @@ data class Maze(
     val start: Pos = Pos(0, 0),
     val goal: Pos? = null
 )
-data class PlayerState(var pos: Pos, var strawberries: Int = 0, val startPos: Pos)
+
+data class PlayerState(
+    var pos: Pos,
+    var strawberries: Int = 0,
+    val startPos: Pos
+)
 
 sealed class ExecEvent {
     data class Step(val newPos: Pos, val strawberries: Int) : ExecEvent()
@@ -27,78 +32,102 @@ sealed class ExecEvent {
     data class Finished(val final: PlayerState) : ExecEvent()
 }
 
-class CommandEngine(private val maze: Maze, private val maxLoopDepth: Int = 64) {
+class CommandEngine(
+    private val maze: Maze,
+    private val maxLoopDepth: Int = 64
+) {
+
     fun runProgram(
         program: List<Command>,
         initialState: PlayerState,
         scope: CoroutineScope,
         stepDelayMs: Long = 350L,
         onEvent: suspend (ExecEvent) -> Unit
-    ): Job {
-        return scope.launch(Dispatchers.Default) {
-            val state = PlayerState(initialState.pos, initialState.strawberries, initialState.startPos)
+    ): Job = scope.launch(Dispatchers.Default) {
+        val state = PlayerState(initialState.pos, initialState.strawberries, initialState.startPos)
 
-            suspend fun emit(event: ExecEvent) {
-                withContext(Dispatchers.Main) { onEvent(event) }
+        suspend fun emit(event: ExecEvent) = withContext(Dispatchers.Main) { onEvent(event) }
+
+        emit(ExecEvent.Started(state))
+
+        // Move player and handle collisions
+        suspend fun movePlayer(dir: Direction) {
+            val (dx, dy) = when (dir) {
+                Direction.UP -> 0 to -1
+                Direction.DOWN -> 0 to 1
+                Direction.LEFT -> -1 to 0
+                Direction.RIGHT -> 1 to 0
             }
-
-            emit(ExecEvent.Started(state))
-
-            suspend fun executeList(list: List<Command>, depth: Int = 0) {
-                if (depth > maxLoopDepth) throw IllegalStateException("Max loop depth exceeded")
-                for (c in list) {
-                    ensureActive()
-                    when (c) {
-                        is Command.Move -> {
-                            val (dx, dy) = when (c.dir) {
-                                Direction.UP -> 0 to -1
-                                Direction.DOWN -> 0 to 1
-                                Direction.LEFT -> -1 to 0
-                                Direction.RIGHT -> 1 to 0
-                            }
-                            stepMove(state, dx, dy, ::emit)
-                        }
-                        is Command.Repeat -> {
-                            val times = max(0, c.times)
-                            repeat(times) { executeList(c.body, depth + 1) }
-                        }
-                        is Command.IfHasStrawberries -> {
-                            if (state.strawberries >= c.min) executeList(c.body, depth + 1)
-                        }
-                        is Command.NoOp -> { /* nothing */ }
+            stepMove(state, dx, dy, ::emit)
+        }
+        // Recursive executor
+        suspend fun executeList(list: List<Command>, depth: Int = 0) {
+            if (depth > maxLoopDepth) throw IllegalStateException("Max loop depth exceeded")
+            for (cmd in list) {
+                ensureActive()
+                when (cmd) {
+                    is Command.Move -> movePlayer(cmd.dir)
+                    is Command.Repeat -> {
+                        val times = max(0, cmd.times)
+                        repeat(times) { executeList(cmd.body, depth + 1) }
                     }
-                    delay(stepDelayMs)
+                    is Command.IfHasStrawberries -> {
+                        if (state.strawberries >= cmd.min) executeList(cmd.body, depth + 1)
+                    }
+                    is Command.NoOp -> { /* do nothing */ }
                 }
+                delay(stepDelayMs)
             }
+        }
 
-            try {
-                executeList(program)
-                if (maze.goal != null && state.pos == maze.goal) emit(ExecEvent.Success(state.pos))
-                emit(ExecEvent.Finished(state))
-            } catch (e: CancellationException) {
-                emit(ExecEvent.Log("Execution cancelled"))
-            } catch (t: Throwable) {
-                emit(ExecEvent.Log("Execution error: ${t.message}"))
-            }
+        try {
+            executeList(program)
+
+            // Check if goal reached after program ends
+            if (maze.goal != null && state.pos == maze.goal) emit(ExecEvent.Success(state.pos))
+            emit(ExecEvent.Finished(state))
+        } catch (e: CancellationException) {
+            emit(ExecEvent.Log("Execution cancelled"))
+        } catch (t: Throwable) {
+            emit(ExecEvent.Log("Execution error: ${t.message}"))
         }
     }
 
-    private suspend fun stepMove(state: PlayerState, dx: Int, dy: Int, emit: suspend (ExecEvent) -> Unit) {
+
+    private suspend fun stepMove(
+        state: PlayerState,
+        dx: Int,
+        dy: Int,
+        emit: suspend (ExecEvent) -> Unit
+    ) {
         val newX = state.pos.x + dx
         val newY = state.pos.y + dy
-        if (newX < 0 || newX >= maze.width || newY < 0 || newY >= maze.height) {
-            emit(ExecEvent.Step(state.pos, state.strawberries)); return
+
+        // Out of bounds
+        if (newX !in 0 until maze.width || newY !in 0 until maze.height) {
+            emit(ExecEvent.Step(state.pos, state.strawberries))
+            return
         }
+
         val candidate = Pos(newX, newY)
-        if (maze.walls.contains(candidate)) {
-            emit(ExecEvent.Step(state.pos, state.strawberries)); return
+
+        // Wall collision
+        if (candidate in maze.walls) {
+            emit(ExecEvent.Step(state.pos, state.strawberries))
+            return
         }
+
+        // Move player
         state.pos = candidate
-        if (maze.strawberries.contains(candidate)) {
+
+        // Collect strawberry
+        if (candidate in maze.strawberries) {
             state.strawberries += 1
             emit(ExecEvent.CollectedStrawberry(candidate, state.strawberries))
         }
-        if (maze.enemies.contains(candidate)) {
+
+        // Hit enemy
+        if (candidate in maze.enemies) {
             if (state.strawberries > 0) {
                 state.strawberries -= 1
                 emit(ExecEvent.HitEnemyConsumedLife(candidate, state.strawberries))
@@ -107,6 +136,7 @@ class CommandEngine(private val maze: Maze, private val maxLoopDepth: Int = 64) 
                 emit(ExecEvent.HitEnemyNoLifeReset(state.startPos))
             }
         } else {
+            // Normal step
             emit(ExecEvent.Step(state.pos, state.strawberries))
         }
     }

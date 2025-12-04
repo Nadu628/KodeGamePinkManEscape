@@ -15,8 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.offset
 import com.individual_project3.kodegame.R
-
-
+import kotlinx.coroutines.isActive
 
 
 @Composable
@@ -35,15 +34,14 @@ fun IdleCharacter(
     var frameIndex by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
-        while (true) {
+        while (isActive) {
             delay(frameDelayMs)
             frameIndex = (frameIndex + 1) % idleFrames.size
         }
     }
 
-    // simple bobbing tied to frame index; animateDpAsState smooths transitions
     val targetYOffset = if (frameIndex % 3 == 0) (-10).dp else 0.dp
-    val yOffset by animateDpAsState(targetValue = targetYOffset)
+    val yOffset by animateDpAsState(targetValue = targetYOffset, label = "idle-bob")
 
     Image(
         painter = painterResource(id = idleFrames[frameIndex]),
@@ -52,8 +50,7 @@ fun IdleCharacter(
         modifier = modifier
             .offset(y = yOffset)
             .size(imageSize)
-            .clip(RoundedCornerShape(8.dp))
-            .then(Modifier),
+            .clip(RoundedCornerShape(8.dp)),
         alignment = Alignment.Center
     )
 }

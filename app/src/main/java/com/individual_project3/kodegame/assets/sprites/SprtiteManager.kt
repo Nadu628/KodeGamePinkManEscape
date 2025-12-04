@@ -12,10 +12,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.individual_project3.kodegame.R
 
-/**
- * Loads and caches sprite frames off the UI thread.
- * CHANGED: frame lists moved here; preloadAllAsync loads bitmaps on IO.
- */
 class SpriteManager(private val context: Context) {
     var playerIdleFrames: List<ImageBitmap> = emptyList()
         private set
@@ -31,6 +27,9 @@ class SpriteManager(private val context: Context) {
         private set
     var playerHitFrames: List<ImageBitmap> = emptyList()     // added
         private set
+    var spikeFrames: List<ImageBitmap> = emptyList()     // added
+        private set
+
 
     fun preloadAllAsync(scope: CoroutineScope) {
         scope.launch { preloadAll() }
@@ -87,6 +86,8 @@ class SpriteManager(private val context: Context) {
             loadBitmap(R.drawable.strawberry_idle15), loadBitmap(R.drawable.strawberry_idle16),
             loadBitmap(R.drawable.strawberry_idle17)
         )
+
+        spikeFrames = listOfNotNull(loadBitmap(R.drawable.spikes))
     }
 
     private fun loadBitmap(@DrawableRes resId: Int): ImageBitmap? {

@@ -1,76 +1,102 @@
 package com.individual_project3.kodegame.ui.screens
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.individual_project3.kodegame.assets.commands.Maze
+import kotlinx.coroutines.delay
+import androidx.compose.animation.core.*
+import androidx.navigation.NavController
+import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.assets.sprites.SpriteManager
-import com.individual_project3.kodegame.game.MazeGrid
-import com.individual_project3.kodegame.game.MazeRendererWithSprites
+import com.individual_project3.kodegame.game.DifficultyMode
 import com.individual_project3.kodegame.game.MazeViewModel
 import com.individual_project3.kodegame.game.PlayerAnimState
-import com.individual_project3.kodegame.game.MazeLevel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-
+import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.LinearEasing
 
 
 @Composable
-fun GameScreen() {
+fun GameScreen(
+    difficulty: DifficultyMode,
+    navController: NavController,
+    onBack: (() -> Unit)? = null
+) {
+    val bubbleFont = remember { FontFamily(Font(R.font.poppins_bold)) }
+
+    val gradient = Brush.verticalGradient(
+        colors = listOf(Color(0xffb3e5fc), Color(0xffb2ff59))
+    )
+
     val context = LocalContext.current
+
+    // --- ViewModel (ONLY declare once) ---
     val vm: MazeViewModel = viewModel(factory = MazeViewModel.Factory(context))
+
     val spriteManager = remember { SpriteManager(context) }
     val scope = rememberCoroutineScope()
 
-    // UI-only state
-    var programText by remember { mutableStateOf("") }
-
-    // Animatables for smooth movement
     val animX = remember { Animatable(0f) }
     val animY = remember { Animatable(0f) }
-
-    // CHANGED: frame index for player animation cycling
     var playerFrameIndex by remember { mutableStateOf(0) }
 
-    // Preload sprites
-    LaunchedEffect(Unit) { spriteManager.preloadAllAsync(scope) }
+    // Load difficulty level once
+    LaunchedEffect(difficulty) {
+        vm.generateNextLevel(difficulty)
+    }
 
-    // Animate when VM playerState changes
+    // Load sprites + music once
+    LaunchedEffect(Unit) {
+        spriteManager.preloadAllAsync(scope)
+        vm.startBackgroundMusic(R.raw.sfx_game_music)
+    }
+
+    // Animate movement
     val playerState = vm.playerState.value
     LaunchedEffect(playerState?.pos) {
         val pos = playerState?.pos ?: return@LaunchedEffect
-        launch { animX.animateTo(pos.x.toFloat()) }
-        launch { animY.animateTo(pos.y.toFloat()) }
+
+        animX.animateTo(
+            targetValue = pos.x.toFloat(),
+            animationSpec = tween(
+                durationMillis = 200,
+                easing = LinearEasing
+            )
+        )
+
+        animY.animateTo(
+            targetValue = pos.y.toFloat(),
+            animationSpec = tween(
+                durationMillis = 200,
+                easing = LinearEasing
+            )
+        )
+
     }
 
-    // CHANGED: cycle frames based on vm.playerAnimState, with special timing for Hit
+    // Animate sprite frames
     LaunchedEffect(vm.playerAnimState.value) {
-        playerFrameIndex = 0
         val state = vm.playerAnimState.value
-        val frameCount = when (state) {
-            PlayerAnimState.Jump -> spriteManager.playerJumpFrames.size
-            PlayerAnimState.Drop -> spriteManager.playerDropFrames.size
-            PlayerAnimState.Run -> spriteManager.playerRunFrames.size
-            PlayerAnimState.Hit -> spriteManager.playerHitFrames.size
-            else -> spriteManager.playerIdleFrames.size
-        }.coerceAtLeast(1)
+        playerFrameIndex = 0
+
+        val frames = when (state) {
+            PlayerAnimState.Jump -> spriteManager.playerJumpFrames
+            PlayerAnimState.Drop -> spriteManager.playerDropFrames
+            PlayerAnimState.Run -> spriteManager.playerRunFrames
+            PlayerAnimState.Hit -> spriteManager.playerHitFrames
+            else -> spriteManager.playerIdleFrames
+        }
 
         val frameDuration = when (state) {
             PlayerAnimState.Hit -> 140L
@@ -79,67 +105,61 @@ fun GameScreen() {
             else -> 140L
         }
 
-        while (vm.playerAnimState.value == state) {
-            playerFrameIndex = (playerFrameIndex + 1) % frameCount
-            delay(frameDuration)
+        if (frames.isNotEmpty()) {
+            while (vm.playerAnimState.value == state) {
+                delay(frameDuration)
+                playerFrameIndex = (playerFrameIndex + 1) % frames.size
+            }
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().padding(8.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Button(onClick = { vm.generateNextLevel() }) { Text("New Level") }
-            Spacer(modifier = Modifier.width(8.dp))
-            if (!vm.isProgramRunning.value) {
-                Button(onClick = {
-                    val parsed = vm.parseProgramFromText(programText)
-                    vm.setLastProgram(parsed)
-                    vm.runLastProgram()
-                }) { Text("Play") }
+    //UI
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(gradient)
+            .padding(16.dp)
+    ) {
+
+        // --- Top bar with Back + Mode ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (onBack != null) {
+                CloudButtonTwo(
+                    text = "Back",
+                    onClick = onBack,
+                    modifier = Modifier.widthIn(min = 96.dp)
+                )
             } else {
-                Button(onClick = { vm.cancelProgram() }) { Text("Stop") }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        vm.currentMaze.value?.let { level ->
-            val playerImage: ImageBitmap? = when (vm.playerAnimState.value) {
-                PlayerAnimState.Jump -> spriteManager.playerJumpFrames.getOrNull(playerFrameIndex)
-                PlayerAnimState.Drop -> spriteManager.playerDropFrames.getOrNull(playerFrameIndex)
-                PlayerAnimState.Run -> spriteManager.playerRunFrames.getOrNull(playerFrameIndex)
-                PlayerAnimState.Hit -> spriteManager.playerHitFrames.getOrNull(playerFrameIndex)
-                else -> spriteManager.playerIdleFrames.getOrNull(playerFrameIndex)
+                Spacer(Modifier.width(96.dp))
             }
 
-            MazeRendererWithSprites(
-                maze = level,
-                playerImage = playerImage,
-                playerAnimX = animX.value,
-                playerAnimY = animY.value,
-                spriteManager = spriteManager
+            Text(
+                text = "Mode: ${difficulty.name}",
+                fontFamily = bubbleFont,
+                fontSize = 18.sp,
+                color = Color.White
             )
-        } ?: Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No level loaded")
+
+            Spacer(Modifier.width(96.dp))
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(12.dp))
 
-        Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                BasicTextField(value = programText, onValueChange = { programText = it }, modifier = Modifier.weight(1f).background(Color.White))
-                Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = {
-                    val parsed = vm.parseProgramFromText(programText)
-                    vm.setLastProgram(parsed)
-                }) { Text("Set Program") }
-            }
-        }
+        // --- Next Level + Play ---
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            CloudButtonTwo(
+                text = "Next Level",
+                onClick = { vm.generateNextLevel(difficulty) }
+            )
 
-        Card(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Column(modifier = Modifier.padding(8.dp)) {
-                Text("Execution Log")
-                vm.execLog.take(8).forEach { Text(it) }
-            }
         }
     }
 }
+

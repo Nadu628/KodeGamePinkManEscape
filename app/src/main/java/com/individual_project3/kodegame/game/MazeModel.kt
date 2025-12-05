@@ -159,27 +159,42 @@ class MazeModel(
 
 // Enemy placement
 object EnemySpawner {
+
+    private fun manhattan(aRow: Int, aCol: Int, bRow: Int, bCol: Int): Int {
+        return kotlin.math.abs(aRow - bRow) + kotlin.math.abs(aCol - bCol)
+    }
+
     fun spawn(grid: MazeGrid, params: DifficultyParams, seed: Long): List<Enemy> {
         val rnd = Random(seed xor 0xE11E)
         val enemies = mutableListOf<Enemy>()
         var placed = 0
 
+        // Try to stay away from START and EXIT by a few tiles
+        val start = grid.indexOfStart()
+        val exit = grid.indexOfExit()
+
         for (r in 1 until grid.height - 1) {
             for (c in 1 until grid.width - 1) {
-                if (grid.tileAt(r, c) == TileType.PATH && placed < params.enemyCount) {
-                    val chance = if (params.enemyCount > 3) 0.09 else 0.04
-                    if (rnd.nextDouble() < chance) {
-                        enemies.add(
-                            Enemy(
-                                row = r,
-                                col = c,
-                                speed = if (params.enemyCount > 3) 1.4f else 1.0f,
-                                visionRange = if (params.enemyCount > 3) 5 else 3,
-                                patrol = listOf(r to c)
-                            )
+                if (placed >= params.enemyCount) break
+
+                if (grid.tileAt(r, c) != TileType.PATH) continue
+
+                // Don't place too close to start/exit (optional tweak)
+                if (start != null && manhattan(r, c, start.first, start.second) < 4) continue
+                if (exit != null && manhattan(r, c, exit.first, exit.second) < 3) continue
+
+                val chance = if (params.enemyCount > 3) 0.09 else 0.04
+                if (rnd.nextDouble() < chance) {
+                    enemies.add(
+                        Enemy(
+                            row = r,
+                            col = c,
+                            speed = if (params.enemyCount > 3) 1.4f else 1.0f,
+                            visionRange = if (params.enemyCount > 3) 5 else 3,
+                            patrol = listOf(r to c)
                         )
-                        placed++
-                    }
+                    )
+                    placed++
                 }
             }
         }
@@ -189,6 +204,10 @@ object EnemySpawner {
 
 // Collectibles placement using learning concepts
 object CollectibleSpawner {
+
+    private fun manhattan(aRow: Int, aCol: Int, bRow: Int, bCol: Int): Int {
+        return kotlin.math.abs(aRow - bRow) + kotlin.math.abs(aCol - bCol)
+    }
 
     fun spawn(
         grid: MazeGrid,
@@ -205,14 +224,24 @@ object CollectibleSpawner {
         var attempts = 0
         val maxAttempts = 5000
 
+        val start = grid.indexOfStart()
+        val exit = grid.indexOfExit()
+
         while (out.size < needed && attempts < maxAttempts) {
             attempts++
             val r = rnd.nextInt(grid.height)
             val c = rnd.nextInt(grid.width)
 
-            if (grid.tileAt(r, c) == TileType.PATH) {
-                out += Collectible(r, c, CollectibleType.STRAWBERRY, points = 5)
-            }
+            if (grid.tileAt(r, c) != TileType.PATH) continue
+
+            // Don't overlap with existing strawberries
+            if (out.any { it.row == r && it.col == c }) continue
+
+            // Keep a bit of distance from start/exit so the path feels more interesting
+            if (start != null && manhattan(r, c, start.first, start.second) < 2) continue
+            if (exit != null && manhattan(r, c, exit.first, exit.second) < 2) continue
+
+            out += Collectible(r, c, CollectibleType.STRAWBERRY, points = 5)
         }
 
         return out

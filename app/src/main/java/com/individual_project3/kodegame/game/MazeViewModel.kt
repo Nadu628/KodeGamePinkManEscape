@@ -38,7 +38,6 @@ class MazeViewModel(
     var lastProgram: List<Command> = emptyList()
         private set
 
-    // NEW: visual program built from blocks
     val uiProgram = mutableStateListOf<UiCommand>()
 
     private var programJob: Job? = null
@@ -48,7 +47,6 @@ class MazeViewModel(
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val audio = AudioManager(context.applicationContext)
 
-            // Load SFX once
             audio.loadSfx(
                 R.raw.sfx_jump,
                 R.raw.sfx_drop,
@@ -72,20 +70,6 @@ class MazeViewModel(
     fun stopBackgroundMusic() {
         audioManager.stopBackground()
     }
-    fun setLastProgram(program: List<Command>) {
-        lastProgram = program
-        appendLog("Program set (${program.size} commands)")
-    }
-
-    fun runLastProgram(stepDelayMs: Long = 350L) {
-        if (lastProgram.isEmpty()) {
-            appendLog("No program set")
-            return
-        }
-        runProgram(lastProgram, stepDelayMs)
-    }
-
-    // ------- UI BLOCK PROGRAM API -------
 
     fun addUiCommand(cmd: UiCommand) {
         uiProgram.add(cmd)
@@ -105,6 +89,19 @@ class MazeViewModel(
         runLastProgram(stepDelayMs)
     }
 
+    fun setLastProgram(program: List<Command>) {
+        lastProgram = program
+        appendLog("Program set (${program.size} commands)")
+    }
+
+    fun runLastProgram(stepDelayMs: Long = 350L) {
+        if (lastProgram.isEmpty()) {
+            appendLog("No program set")
+            return
+        }
+        runProgram(lastProgram, stepDelayMs)
+    }
+
     // ------- LEVEL / MAZE -------
 
     fun generateNextLevel(mode: DifficultyMode = DifficultyMode.EASY) {
@@ -113,9 +110,21 @@ class MazeViewModel(
             val level = withContext(Dispatchers.Default) { mazeModel.nextLevel(mode) }
             val maze = convertMazeLevelToMaze(level)
             currentMaze.value = maze
-            playerState.value = PlayerState(pos = maze.start, strawberries = 0, startPos = maze.start)
+
+            // ⭐ CHANGED: ensure player starts exactly at maze.start
+            val startPos = maze.start
+            playerState.value = PlayerState(
+                pos = startPos,
+                strawberries = 0,
+                startPos = startPos
+            )
+
             execLog.clear()
             uiProgram.clear()
+
+            // ⭐ NEW: reset animation to Idle; GameScreen will switch to Run once synced
+            playerAnimState.value = PlayerAnimState.Idle
+
             isLoading.value = false
         }
     }
@@ -207,15 +216,27 @@ class MazeViewModel(
                 val dy = if (prev != null) newPos.y - prev.y else 0
                 when {
                     dy < 0 -> {
-                        setPlayerAnimStateWithTimeout(PlayerAnimState.Jump, revertTo = PlayerAnimState.Run, timeoutMs = 300L)
+                        setPlayerAnimStateWithTimeout(
+                            PlayerAnimState.Jump,
+                            revertTo = PlayerAnimState.Run,
+                            timeoutMs = 300L
+                        )
                         audioManager.play(R.raw.sfx_jump)
                     }
                     dy > 0 -> {
-                        setPlayerAnimStateWithTimeout(PlayerAnimState.Drop, revertTo = PlayerAnimState.Run, timeoutMs = 300L)
+                        setPlayerAnimStateWithTimeout(
+                            PlayerAnimState.Drop,
+                            revertTo = PlayerAnimState.Run,
+                            timeoutMs = 300L
+                        )
                         audioManager.play(R.raw.sfx_drop)
                     }
                     else -> {
-                        setPlayerAnimStateWithTimeout(PlayerAnimState.Run, revertTo = PlayerAnimState.Idle, timeoutMs = 250L)
+                        setPlayerAnimStateWithTimeout(
+                            PlayerAnimState.Run,
+                            revertTo = PlayerAnimState.Idle,
+                            timeoutMs = 250L
+                        )
                     }
                 }
 
@@ -229,9 +250,22 @@ class MazeViewModel(
                     ps.strawberries = event.strawberries
                     playerState.value = ps
                 }
-                appendLog("Collected strawberry at ${event.pos} (total=${event.strawberries})")
+
+                //remove berry from Maze object
+                currentMaze.value?.let { maze ->
+                    val updated = maze.strawberries.toMutableSet()
+                    updated.remove(event.pos)
+                    currentMaze.value = maze.copy(strawberries = updated)
+                }
+
+                appendLog("Collected strawberry at ${event.pos}")
                 audioManager.play(R.raw.sfx_collecting_fruit)
-                setPlayerAnimStateWithTimeout(PlayerAnimState.Run, revertTo = PlayerAnimState.Idle, timeoutMs = 300L)
+
+                setPlayerAnimStateWithTimeout(
+                    PlayerAnimState.Run,
+                    revertTo = PlayerAnimState.Idle,
+                    timeoutMs = 300L
+                )
             }
 
             is ExecEvent.HitEnemyConsumedLife -> {
@@ -243,7 +277,11 @@ class MazeViewModel(
                 }
                 appendLog("Hit enemy at ${event.pos}, lost a strawberry (left=${event.strawberriesLeft})")
                 audioManager.play(R.raw.sfx_hit)
-                setPlayerAnimStateWithTimeout(PlayerAnimState.Hit, revertTo = PlayerAnimState.Idle, timeoutMs = 600L)
+                setPlayerAnimStateWithTimeout(
+                    PlayerAnimState.Hit,
+                    revertTo = PlayerAnimState.Idle,
+                    timeoutMs = 600L
+                )
             }
 
             is ExecEvent.HitEnemyNoLifeReset -> {
@@ -254,7 +292,11 @@ class MazeViewModel(
                 }
                 appendLog("Hit enemy with no strawberries, reset to ${event.resetTo}")
                 audioManager.play(R.raw.sfx_hit)
-                setPlayerAnimStateWithTimeout(PlayerAnimState.Hit, revertTo = PlayerAnimState.Idle, timeoutMs = 600L)
+                setPlayerAnimStateWithTimeout(
+                    PlayerAnimState.Hit,
+                    revertTo = PlayerAnimState.Idle,
+                    timeoutMs = 600L
+                )
             }
 
             is ExecEvent.Success -> {
@@ -274,7 +316,22 @@ class MazeViewModel(
         }
     }
 
-    private fun setPlayerAnimStateWithTimeout(state: PlayerAnimState, revertTo: PlayerAnimState, timeoutMs: Long) {
+    fun resetPlayerToStart() {
+        val maze = currentMaze.value ?: return
+        val ps = playerState.value ?: return
+
+        ps.pos = maze.start
+        ps.strawberries = 0
+        playerState.value = ps
+
+        playerAnimState.value = PlayerAnimState.Idle
+    }
+
+    private fun setPlayerAnimStateWithTimeout(
+        state: PlayerAnimState,
+        revertTo: PlayerAnimState,
+        timeoutMs: Long
+    ) {
         animResetJob?.cancel()
         playerAnimState.value = state
         animResetJob = viewModelScope.launch {

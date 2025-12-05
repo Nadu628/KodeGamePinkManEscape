@@ -1,5 +1,12 @@
 package com.individual_project3.kodegame.assets.commands
 
+sealed class Command {
+    data class Move(val dir: Direction) : Command()
+    data class Repeat(val times: Int, val body: List<Command>) : Command()
+    data class IfHasStrawberries(val min: Int, val body: List<Command>) : Command()
+    object NoOp : Command()
+}
+
 object Commands {
 
     fun parseProgram(input: String): List<Command> {
@@ -32,7 +39,6 @@ object Commands {
         while (i < tokens.size) {
             when (val token = tokens[i]) {
 
-
                 "move" -> {
                     val dirToken = tokens.getOrNull(i + 1)
                         ?: throw error("Expected direction after 'move'", i)
@@ -55,7 +61,9 @@ object Commands {
                     out.add(Command.Repeat(times, body))
 
                     // next should be at closing brace
-                    if (tokens.getOrNull(next) != "}") throw error("Expected '}' to close repeat block", next)
+                    if (tokens.getOrNull(next) != "}") {
+                        throw error("Expected '}' to close repeat block", next)
+                    }
                     i = next + 1
                 }
 
@@ -74,7 +82,9 @@ object Commands {
                         val (body, next) = parseCommands(tokens, i + 5)
                         out.add(Command.IfHasStrawberries(min, body))
 
-                        if (tokens.getOrNull(next) != "}") throw error("Expected '}' to close if block", next)
+                        if (tokens.getOrNull(next) != "}") {
+                            throw error("Expected '}' to close if block", next)
+                        }
                         i = next + 1
                     } else {
                         throw error("Bad if syntax. Expected: if strawberries >= X { ... }", i)
@@ -82,8 +92,7 @@ object Commands {
                 }
 
                 "}" -> return out to i
-
-                ";" -> i++
+                ";" -> i++ // ignore semicolons
 
                 else -> throw error("Unexpected token '$token'", i)
             }
@@ -93,11 +102,11 @@ object Commands {
     }
 
     private fun parseDirection(token: String): Direction? = when (token) {
-        "up" -> Direction.UP
-        "down" -> Direction.DOWN
-        "left" -> Direction.LEFT
+        "up"    -> Direction.UP
+        "down"  -> Direction.DOWN
+        "left"  -> Direction.LEFT
         "right" -> Direction.RIGHT
-        else -> null
+        else    -> null
     }
 
     private fun error(msg: String, index: Int): IllegalArgumentException =

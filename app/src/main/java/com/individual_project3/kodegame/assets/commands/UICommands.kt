@@ -1,6 +1,7 @@
 package com.individual_project3.kodegame.assets.commands
 
 
+// Visual / UI commands that correspond to blocks the child drags
 sealed class UiCommand {
     object MoveUp : UiCommand()
     object MoveDown : UiCommand()

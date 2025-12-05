@@ -77,6 +77,7 @@ class AuthViewModel(
                     onComplete(null)
                 }
             }catch (e: Exception){
+                Log.e("LOGIN_PARENT", "Exception during login", e)
                 _error.value = e.message
                 onComplete(null)
             }finally {
@@ -149,6 +150,7 @@ class AuthViewModel(
                     onComplete(null)
                 }
             }catch (e:Exception){
+                Log.e("LOGIN_CHILD", "Exception during login", e)
                 _error.value = e.message
                 onComplete(null)
             }finally {

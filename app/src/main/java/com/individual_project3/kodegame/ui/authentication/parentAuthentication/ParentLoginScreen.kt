@@ -67,7 +67,7 @@ fun ParentLoginScreen(
     fun validateALl(): Boolean{
         var ok = true
         if (email.isBlank()) { emailError = "Enter email"; ok = false }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { emailError = "Invalid email"; ok = false }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) { emailError = "Invalid email"; ok = false }
         if (password.isBlank()) { passwordError = "Enter password"; ok = false }
         return ok
     }

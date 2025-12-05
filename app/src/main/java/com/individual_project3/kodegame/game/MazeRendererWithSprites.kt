@@ -4,11 +4,13 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -25,23 +27,24 @@ fun MazeRendererWithSprites(
     playerAnimX: Float,
     playerAnimY: Float,
     spriteManager: SpriteManager,
-    tileSizeDp: Dp = 40.dp
+    tileSizeDp: Dp
 ) {
-    val tileSizePx = with(LocalDensity.current) { tileSizeDp.toPx() }
+    val density = LocalDensity.current
+    val tileSizePx = with(density) { tileSizeDp.toPx() }
+    val canvasWidthDp = tileSizeDp * maze.width
+    val canvasHeightDp = tileSizeDp * maze.height
 
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height((maze.height * tileSizeDp.value).dp)
+            .width(canvasWidthDp)
+            .height(canvasHeightDp)
             .background(Color(0xFF87CEFA)) // sky
     ) {
         Canvas(
             modifier = Modifier
-                .fillMaxWidth()
-                .height((maze.height * tileSizeDp.value).dp)
+                .fillMaxSize()
         ) {
-
-            // 1. "Cloud" tiles background
+            // 1. Tiles
             for (y in 0 until maze.height) {
                 for (x in 0 until maze.width) {
 
@@ -50,22 +53,23 @@ fun MazeRendererWithSprites(
                     val py = y * tileSizePx
 
                     val bgColor = when {
-                        pos in maze.walls -> Color(0xFFB0BEC5)      // obstacles
-                        pos == maze.start -> Color(0xFFC8E6C9)      // start
-                        pos == maze.goal  -> Color(0xFFBBDEFB)      // exit
-                        else -> Color(0xFFF5F9FF)                   // cloud-ish path
+                        pos in maze.walls -> Color(0xFFB0BEC5)      // gray walls
+                        pos == maze.start -> Color(0xFFC8E6C9)      // green start
+                        pos == maze.goal  -> Color(0xFFBBDEFB)      // blue exit
+                        else              -> Color(0xFFFFFFFF)      // white path
                     }
 
                     drawRect(
                         color = bgColor,
-                        topLeft = Offset(px + 4f, py + 4f),
-                        size = Size(tileSizePx - 8f, tileSizePx - 8f)
+                        topLeft = Offset(px, py),
+                        size = Size(tileSizePx, tileSizePx)
                     )
                 }
             }
 
             val time = System.currentTimeMillis()
 
+            // 2. Strawberries
             val strawberryFrame = spriteManager.strawberryFrames
                 .takeIf { it.isNotEmpty() }
                 ?.let { frames ->
@@ -73,9 +77,6 @@ fun MazeRendererWithSprites(
                     frames[idx]
                 }
 
-            val spikeFrame = spriteManager.spikeFrames.firstOrNull()
-
-            // 2. Strawberries
             strawberryFrame?.let { frame ->
                 val srcSize = IntSize(frame.width, frame.height)
                 val dstSize = IntSize(tileSizePx.toInt(), tileSizePx.toInt())
@@ -94,7 +95,8 @@ fun MazeRendererWithSprites(
                 }
             }
 
-            // 3. Spikes (hazards)
+            // 3. Spikes / hazards
+            val spikeFrame = spriteManager.spikeFrames.firstOrNull()
             spikeFrame?.let { frame ->
                 val srcSize = IntSize(frame.width, frame.height)
                 val dstSize = IntSize(tileSizePx.toInt(), tileSizePx.toInt())
@@ -132,3 +134,4 @@ fun MazeRendererWithSprites(
         }
     }
 }
+

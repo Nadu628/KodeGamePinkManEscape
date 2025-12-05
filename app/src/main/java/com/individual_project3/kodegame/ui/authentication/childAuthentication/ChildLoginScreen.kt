@@ -139,7 +139,7 @@ fun ChildLoginScreen(
                     if (validateALl()) {
                         viewModel.loginChild(username, password) { child ->
                             if (child != null) {
-                                navController.navigate("game_instructions_screen")
+                                navController.navigate("difficulty_screen")
                             } else {
                                 Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT)
                                     .show()

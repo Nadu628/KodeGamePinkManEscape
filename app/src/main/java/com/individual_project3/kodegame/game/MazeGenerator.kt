@@ -40,14 +40,20 @@ object MazeGenerator {
 
         // Weighted choice for DFS carving
         fun pickNext(stackTop: Cell): Cell? {
-            val options = neighborsTwoSteps(stackTop).filter { tiles[idx(it.r, it.c)] == TileType.WALL }
+            val options = neighborsTwoSteps(stackTop).filter {
+                tiles[idx(it.r, it.c)] == TileType.WALL
+            }
             if (options.isEmpty()) return null
+
             val weighted = options.map {
-                val around = neighborsTwoSteps(it).count { n -> tiles[idx(n.r, n.c)] == TileType.PATH }
+                val around = neighborsTwoSteps(it).count { n ->
+                    tiles[idx(n.r, n.c)] == TileType.PATH
+                }
                 val branchWeight = params.branchingFactor * (1 + around)
                 val deadEndWeight = params.deadEndFavor * (1 + (2 - around).coerceAtLeast(0))
                 it to (branchWeight + deadEndWeight)
             }
+
             val sum = weighted.sumOf { it.second }
             val roll = rnd.nextDouble() * sum
             var acc = 0.0
@@ -58,7 +64,7 @@ object MazeGenerator {
             return weighted.last().first
         }
 
-        // DFS carve
+        // Depth-first carving - this produces a maze "tree"
         val stack = ArrayDeque<Cell>()
         val startCell = Cell(startR, startC)
         setPath(startR, startC)
@@ -78,13 +84,16 @@ object MazeGenerator {
             }
         }
 
-        // Gather path cells
+        // Collect all path cells
         val pathCells = buildList {
-            for (r in 0 until h) for (c in 0 until w)
-                if (tiles[idx(r, c)] == TileType.PATH) add(Cell(r, c))
+            for (r in 0 until h) {
+                for (c in 0 until w) {
+                    if (tiles[idx(r, c)] == TileType.PATH) add(Cell(r, c))
+                }
+            }
         }
 
-        // Find farthest cell from starting point for better START/EXIT placement
+        // BFS to find a "far" EXIT for nicer path length
         fun bfsFarthest(start: Cell): Cell {
             val visited = Array(h) { BooleanArray(w) { false } }
             val queue = ArrayDeque<Pair<Cell, Int>>()
@@ -105,7 +114,11 @@ object MazeGenerator {
                     Cell(current.r + 1, current.c),
                     Cell(current.r, current.c - 1),
                     Cell(current.r, current.c + 1)
-                ).filter { inBounds(it.r, it.c) && !visited[it.r][it.c] && tiles[idx(it.r, it.c)] == TileType.PATH }
+                ).filter {
+                    inBounds(it.r, it.c) &&
+                            !visited[it.r][it.c] &&
+                            tiles[idx(it.r, it.c)] == TileType.PATH
+                }
 
                 for (n in neighbors) {
                     visited[n.r][n.c] = true
@@ -116,29 +129,42 @@ object MazeGenerator {
             return farthest
         }
 
-        // START and EXIT placement
+        // START and EXIT: always on PATH, always connected
         val start = pathCells.firstOrNull() ?: Cell(startR, startC)
         val exit = bfsFarthest(start)
         tiles[idx(start.r, start.c)] = TileType.START
         tiles[idx(exit.r, exit.c)] = TileType.EXIT
 
-        // Sprinkle hazards and rewards
+        // Place hazards / rewards only on PATH tiles (never on walls)
         fun sprinkle(type: TileType, density: Double) {
             val candidates = pathCells
-                .filter { tiles[idx(it.r, it.c)] == TileType.PATH && it != start && it != exit }
+                .filter {
+                    val t = tiles[idx(it.r, it.c)]
+                    t == TileType.PATH && it != start && it != exit
+                }
                 .shuffled(rnd)
+
             val count = (candidates.size * density).toInt()
-            for (i in 0 until count) {
+            for (i in 0 until count.coerceAtMost(candidates.size)) {
                 val cell = candidates[i]
                 tiles[idx(cell.r, cell.c)] = type
             }
         }
 
+        // Small boosts based on concepts (LOOPS → more rewards, CONDITIONALS → more hazards)
         val hazardBoost = if (LearningConcept.CONDITIONALS in concepts) 0.01 else 0.0
         val rewardBoost = if (LearningConcept.LOOPS in concepts) 0.01 else 0.0
 
-        sprinkle(TileType.HAZARD, (params.hazardDensity + hazardBoost).coerceAtMost(0.20))
-        sprinkle(TileType.REWARD, (params.rewardDensity + rewardBoost).coerceAtMost(0.25))
+        sprinkle(
+            TileType.HAZARD,
+            (params.hazardDensity + hazardBoost).coerceAtMost(
+                if (params.enemyCount <= 1) 0.10 else 0.20
+            )
+        )
+        sprinkle(
+            TileType.REWARD,
+            (params.rewardDensity + rewardBoost).coerceAtMost(0.25)
+        )
 
         return MazeGrid(width = w, height = h, tiles = tiles)
     }

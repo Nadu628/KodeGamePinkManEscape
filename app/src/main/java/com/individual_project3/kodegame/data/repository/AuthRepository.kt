@@ -50,7 +50,7 @@ class AuthRepository(private val dao: AuthDao){
         Log.d("REGISTER_CHILD", "Username: $username")
         Log.d("REGISTER_CHILD", "ParentId: $parentId")
         Log.d("REGISTER_CHILD", "PasswordHash=${hashPassword(passwordPlain.trim())}")
-        Log.d("REGISTER_CHILD", "--------------------------------")
+        Log.d("Auth", "Registering child: email=$username, hash=${hashPassword(passwordPlain.trim())}")
         val hashed = hashPassword(passwordPlain.trim())
         val child = Child(
             parentId = parentId,
@@ -76,7 +76,14 @@ class AuthRepository(private val dao: AuthDao){
         Log.d("LOGIN_PARENT", "DB Hash: ${parent?.passwordHash}")
         val hashed = hashPassword(passwordPlain.trim())
         Log.d("Auth", "Login attempt: email=$email, enteredHash=$hashed, storedHash=${parent.passwordHash}")
-        return if (parent.passwordHash == hashed) parent else null
+        return if (parent.passwordHash == hashed){
+            Log.d("LOGIN_PARENT", "Passwords MATCH — Login success")
+            parent
+        } else{
+            Log.d("LOGIN_PARENT", "Passwords DO NOT match — Login failed")
+            null
+        }
+
     }
 
     //child login: find child by username and password
@@ -88,7 +95,13 @@ class AuthRepository(private val dao: AuthDao){
         Log.d("LOGIN_CHILD", "DB Hash: ${child?.passwordHash}")
         val hashed = hashPassword(passwordPlain.trim())
         Log.d("Auth", "Login attempt: email=$username, enteredHash=$hashed, storedHash=${child.passwordHash}")
-        return if(child.passwordHash == hashed) child else null
+        return if(child.passwordHash == hashed){
+            Log.d("LOGIN_CHILD", "Passwords MATCH — Login success")
+            child
+        } else{
+            Log.d("LOGIN_CHILD", "Passwords DO NOT match — Login failed")
+            null
+        }
     }
 
     //observe parent with child for UI updates

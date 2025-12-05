@@ -46,8 +46,10 @@ import androidx.compose.material3.IconButton
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 
 @Composable
-fun ParentLoginScreen(navController: NavController,
-                      viewModel: AuthViewModel = viewModel()){
+fun ParentLoginScreen(
+    navController: NavController,
+    viewModel: AuthViewModel = viewModel())
+{
     val context = LocalContext.current
 
     //UI state
@@ -64,18 +66,9 @@ fun ParentLoginScreen(navController: NavController,
 
     fun validateALl(): Boolean{
         var ok = true
-        emailError = when{
-            email.isBlank() -> "Enter email"
-            !Patterns.EMAIL_ADDRESS.matcher(email).matches() -> "Invalid email"
-            else -> null
-        }
-        if(emailError != null) ok = false
-
-        passwordError = when{
-            password.isBlank() -> "Enter password"
-            else -> null
-        }
-        if(passwordError != null) ok = false
+        if (email.isBlank()) { emailError = "Enter email"; ok = false }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) { emailError = "Invalid email"; ok = false }
+        if (password.isBlank()) { passwordError = "Enter password"; ok = false }
         return ok
     }
 
@@ -86,23 +79,25 @@ fun ParentLoginScreen(navController: NavController,
     ){
         Column(
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .padding(20.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Parent Login",
-                fontSize = 20.sp,
+                fontSize = 26.sp,
                 fontFamily = bubbleFont,
+                color = Color.White,
                 modifier = Modifier.padding(bottom = 12.dp)
             )
 
             Spacer(modifier = Modifier.height(40.dp))
+
             //email field
             CloudTextField(
                 value = email,
-                onValueChange = {email = it; emailError = null},
+                onValueChange = {email = it.trim(); emailError = null},
                 labelText = "Email",
                 isError = emailError != null,
                 errorText = emailError,
@@ -115,7 +110,7 @@ fun ParentLoginScreen(navController: NavController,
             //password field with toggle
             CloudTextField(
                 value = password,
-                onValueChange = {password = it; passwordError = null},
+                onValueChange = {password = it.trim(); passwordError = null},
                 labelText = "Password",
                 isError = passwordError != null,
                 errorText = passwordError,
@@ -132,7 +127,7 @@ fun ParentLoginScreen(navController: NavController,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             val allFilled = remember(email, password){
                 email.isNotBlank() && password.isNotBlank()
@@ -155,12 +150,12 @@ fun ParentLoginScreen(navController: NavController,
             }
 
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             CloudButtonTwo("Register") {
                 navController.navigate("parent_registration_screen")
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             CloudButtonTwo("Back") {
                 navController.navigate("pick_user_screen")
             }

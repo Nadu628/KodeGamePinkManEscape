@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
-import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 
 
@@ -57,6 +56,53 @@ fun ParentRegistrationScreen(
     ){
     val context = LocalContext.current
 
+    //formater convert MM/DD/YYYY -> yyyy-mm-dd
+    val inputFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
+    val dbFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+    fun parseDobForDb(value: String): String? {
+        return try {
+            val parsed = LocalDate.parse(value, inputFormatter)
+            parsed.format(dbFormatter)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    //helper to show DatePickerDialog and return formatted date
+    fun showDatePicker(
+        context: Context,
+        initialText: String?,
+        onDateSelected: (String) -> Unit
+    ) {
+        val now = Calendar.getInstance()
+
+        val initDate = try {
+            if (!initialText.isNullOrBlank()) {
+                val parsed = LocalDate.parse(initialText, inputFormatter) // ⭐ FIX
+                Calendar.getInstance().apply {
+                    set(parsed.year, parsed.monthValue - 1, parsed.dayOfMonth)
+                }
+            } else now
+        } catch (e: Exception) {
+            now
+        }
+
+        val dpd = DatePickerDialog(
+            context,
+            { _, year, month, dayOfMonth ->
+                val picked = LocalDate.of(year, month + 1, dayOfMonth)
+                onDateSelected(picked.format(inputFormatter)) // ⭐ FIX — correct for UI
+            },
+            initDate.get(Calendar.YEAR),
+            initDate.get(Calendar.MONTH),
+            initDate.get(Calendar.DAY_OF_MONTH)
+        )
+
+        dpd.show()
+    }
+
+
     //UI state for all input fields
     var parentFN by remember { mutableStateOf("") }
     var parentLN by remember { mutableStateOf("") }
@@ -67,7 +113,7 @@ fun ParentRegistrationScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    //validation error messages (null is no error)
+    //errors
     var parentFNError by remember {mutableStateOf<String?>(null)}
     var parentLNError by remember {mutableStateOf<String?>(null)}
     var parentDOBError by remember {mutableStateOf<String?>(null)}
@@ -79,46 +125,8 @@ fun ParentRegistrationScreen(
 
     //font
     val bubbleFont = FontFamily(Font(R.font.poppins_bold))
-
     //background
     val gradient = Brush.verticalGradient(colors = listOf(Color(0xffb3e5fc), Color(0xffb2ff59)))
-
-    //Date formatter for MM/DD/YYYY
-    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.US)
-
-    //helper to show DatePickerDialog and return formatted date
-    fun showDatePicker(
-        context: Context,
-        initialText: String?,
-        onDateSelected: (String) -> Unit
-    ) {
-        val now = Calendar.getInstance()
-        val initDate = try {
-            if (!initialText.isNullOrBlank()) {
-                val parsed = LocalDate.parse(initialText, formatter)
-                Calendar.getInstance().apply {
-                    set(parsed.year, parsed.monthValue - 1, parsed.dayOfMonth)
-                }
-            } else now
-        } catch (e: Exception) {
-            now
-        }
-
-        val dpd = DatePickerDialog(
-            context,
-            R.style.SpinnerDatePickerDialogTheme,
-            { _, year, month, dayOfMonth ->
-                val picked = LocalDate.of(year, month + 1, dayOfMonth)
-                onDateSelected(picked.format(formatter))
-            },
-            initDate.get(Calendar.YEAR),
-            initDate.get(Calendar.MONTH),
-            initDate.get(Calendar.DAY_OF_MONTH)
-        )
-        dpd.show()
-
-    }
-
 
     //validation helpers
     fun isValidEmail(value: String) = value.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(value).matches()
@@ -129,17 +137,6 @@ fun ParentRegistrationScreen(
         return nameRegex.matches(value.trim())
     }
 
-    //parse date string to LocalDate or return null
-    fun parseDate(value: String): LocalDate?{
-        return try{
-            LocalDate.parse(value, formatter)
-        }catch(e: DateTimeParseException){
-            null
-        }
-    }
-
-    //compute age in years from dob
-    fun ageYears(dob: LocalDate): Int = Period.between(dob, LocalDate.now()).years
 
     //validate all fields and set error messages; return true if everything is correct
     fun validateAll(): Boolean{
@@ -161,14 +158,13 @@ fun ParentRegistrationScreen(
         if(parentLNError != null) ok = false
 
         //parent dob -> must be 18+
-        val pDOB = parseDate(parentDOB)
-        parentDOBError = when{
+        val parentDobDb = parseDobForDb(parentDOB)
+        parentDOBError = when {
             parentDOB.isBlank() -> "Enter your date of birth"
-            pDOB == null -> "Use MM/DD/YYYY or pick from calendar"
-            ageYears(pDOB) < 18 -> "Parent must be at least 18 years old"
+            parentDobDb == null -> "Use MM/DD/YYYY"
             else -> null
         }
-        if(parentDOBError != null) ok = false
+        if (parentDOBError != null) ok = false
 
         //child name
         childFNError = when{
@@ -186,13 +182,13 @@ fun ParentRegistrationScreen(
         if(childLNError != null) ok = false
 
         //child DOB
-        val cDOB = parseDate(childDOB)
-        childDOBError = when{
-            childDOB.isBlank() -> "Enter your child's date of birth"
-            cDOB == null -> "Use MM/DD/YYYY or pick from calendar"
+        val childDobDb = parseDobForDb(childDOB)
+        childDOBError = when {
+            childDOB.isBlank() -> "Enter child's date of birth"
+            childDobDb == null -> "Use MM/DD/YYYY"
             else -> null
         }
-        if(childDOBError != null) ok = false
+        if (childDOBError != null) ok = false
 
         //email
         emailError = when{
@@ -396,31 +392,35 @@ fun ParentRegistrationScreen(
                         .fillMaxWidth()
                         .height(52.dp),
                     onClick = {
-                        val ok = validateAll()
-                        if(ok) {
-                            viewModel.registerParent(
-                                parentFN.trim(),
-                                parentLN.trim(),
-                                parentDOB.trim(),
-                                email.trim(),
-                                password.trim(),
-                                childFN.trim(),
-                                childLN.trim(),
-                                childDOB.trim()
-                            ){ id ->
-                                if (id != null) {
-                                    Toast.makeText(context, "Registered Successfully", Toast.LENGTH_SHORT).show()
-                                    navController.navigate("parent_login_screen") {
-                                        popUpTo("parent_registration_screen") { inclusive = true }
-                                        launchSingleTop = true
-                                    }
-                                }
-
-                            }
-
-                        }else{
-                            Toast.makeText(context, "Please fix errors", Toast.LENGTH_SHORT ).show()
+                        if (!validateAll()) {
+                            Toast.makeText(context, "Fix errors", Toast.LENGTH_SHORT).show()
+                            return@CloudButtonTwo
                         }
+
+                        //Convert DOBs AGAIN SAFELY
+                        val parentDobDb = parseDobForDb(parentDOB)!!
+                        val childDobDb = parseDobForDb(childDOB)!!
+
+                        viewModel.registerParent(
+                            parentFN.trim(),
+                            parentLN.trim(),
+                            parentDobDb,
+                            email.trim(),
+                            password.trim(),
+                            childFN.trim(),
+                            childLN.trim(),
+                            childDobDb
+                        ) { id ->
+                            if (id != null) {
+                                Toast.makeText(context, "Registered!", Toast.LENGTH_SHORT).show()
+                                navController.navigate("pick_user_screen") {
+                                    popUpTo("splash_screen") { inclusive = true }
+                                }
+                            }else{
+                                Toast.makeText(context, "Please fix errors", Toast.LENGTH_SHORT ).show()
+                            }
+                        }
+
                     })
 
 

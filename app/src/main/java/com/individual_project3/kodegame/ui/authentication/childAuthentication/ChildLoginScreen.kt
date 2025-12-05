@@ -44,9 +44,11 @@ import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 
 @Composable
-fun ChildLoginScreen(navController: NavController,
-                     viewModel: AuthViewModel){
+fun ChildLoginScreen(
+    navController: NavController,
+    viewModel: AuthViewModel) {
     val context = LocalContext.current
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
@@ -59,33 +61,30 @@ fun ChildLoginScreen(navController: NavController,
 
     //Error states
     var usernameError by remember { mutableStateOf<String?>(null) }
-    var passwordError by remember{mutableStateOf<String?>(null)}
+    var passwordError by remember { mutableStateOf<String?>(null) }
 
-    fun validateALl(): Boolean{
+    fun validateALl(): Boolean {
         var ok = true
-        usernameError = when{
-            username.isBlank() -> "Enter username"
-            else -> null
+        if (username.isBlank()) {
+            usernameError = "Enter username"; ok = false
         }
-        if(usernameError != null) ok = false
-
-        passwordError = when{
-            password.isBlank() -> "Enter password"
-            else -> null
+        if (password.isBlank()) {
+            passwordError = "Enter password"; ok = false
         }
-        if(passwordError != null) ok = false
         return ok
     }
+
     Box(
         modifier = Modifier.fillMaxSize().background(gradient),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(20.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Child Login",
+            Text(
+                "Child Login",
                 fontSize = 24.sp,
                 fontFamily = bubbleFont,
                 color = Color.White,
@@ -97,28 +96,32 @@ fun ChildLoginScreen(navController: NavController,
             //username field
             CloudTextField(
                 value = username,
-                onValueChange = {username = it; usernameError = null},
+                onValueChange = { username = it.trim(); usernameError = null },
                 labelText = "Username",
                 isError = usernameError != null,
                 errorText = usernameError,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             //password field with toggle
             CloudTextField(
                 value = password,
-                onValueChange = {password = it; passwordError = null},
+                onValueChange = { password = it.trim(); passwordError = null },
                 labelText = "Password",
                 isError = passwordError != null,
                 errorText = passwordError,
                 singleLine = true,
-                visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
-                    val icon = if(passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
-                    IconButton(onClick = {passwordVisible = !passwordVisible }){
-                        Icon(imageVector = icon, contentDescription = if(passwordVisible) "Hide password" else "Show password")
+                    val icon =
+                        if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        )
 
                     }
                 },
@@ -126,35 +129,36 @@ fun ChildLoginScreen(navController: NavController,
                 modifier = Modifier.fillMaxWidth()
             )
 
+            Spacer(modifier = Modifier.height(18.dp))
             AnimatedVisibility(
                 visible = allFilled,
-                enter = slideInHorizontally(initialOffsetX =  {it  }),
+                enter = slideInHorizontally(initialOffsetX = { it }),
                 exit = fadeOut()
             ) {
                 CloudButtonTwo("Login") {
-                    viewModel.loginChild(username, password){id ->
-                        if(id != null){
-                            navController.navigate("game_instructions_screen")
-                        }else{
-                            Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
+                    if (validateALl()) {
+                        viewModel.loginChild(username, password) { child ->
+                            if (child != null) {
+                                navController.navigate("game_instructions_screen")
+                            } else {
+                                Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                         }
                     }
                 }
+
             }
-
-
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             CloudButtonTwo("Register") {
                 navController.navigate("child_registration_screen")
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+
             CloudButtonTwo("Back") {
-                navController.popBackStack()
+                navController.navigate("pick_user_screen")
             }
-
-
         }
     }
-
 }

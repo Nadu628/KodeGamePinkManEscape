@@ -65,7 +65,7 @@ fun UserTypeScreen(
     var fadeOut by remember { mutableStateOf(false) }
     val alpha by animateFloatAsState(
         targetValue = if (fadeOut) 0f else 1f,
-        animationSpec = tween(500),
+        animationSpec = tween(450),
         label = ""
     )
 
@@ -76,36 +76,35 @@ fun UserTypeScreen(
     var isJumping by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
+    val density = LocalDensity.current
+
+    // When jump triggered, character bounces up
+    val baseY = 40.dp
+    val jumpHeight = 50.dp
+    val animY = remember { Animatable(0f) }
+
+    LaunchedEffect(isJumping) {
+        if (isJumping) {
+            val base = with(density) { baseY.toPx() }
+            val jump = with(density) { jumpHeight.toPx() }
+
+            animY.animateTo(
+                base - jump,
+                tween(250, easing = FastOutLinearInEasing)
+            )
+            animY.animateTo(
+                base,
+                tween(260, easing = LinearOutSlowInEasing)
+            )
+            isJumping = false
+        }
+    }
 
     // Show buttons after short delay
     LaunchedEffect(Unit) {
         delay(300)
         showButtons = true
     }
-
-    // When jump triggered, character bounces up
-    val density = LocalDensity.current
-    val baseYdp = 40.dp
-    val jumpHeightDp = 36.dp
-    val characterYOffset = remember { Animatable(0f) }
-
-    LaunchedEffect(isJumping) {
-        if (isJumping) {
-            val base = with(density) { baseYdp.toPx() }
-            val jump = with(density) { jumpHeightDp.toPx() }
-
-            characterYOffset.animateTo(
-                base - jump,
-                animationSpec = tween(220, easing = FastOutLinearInEasing)
-            )
-            characterYOffset.animateTo(
-                base,
-                animationSpec = tween(260, easing = LinearOutSlowInEasing)
-            )
-            isJumping = false
-        }
-    }
-
 
     // UI LAYOUT
     Box(
@@ -120,22 +119,22 @@ fun UserTypeScreen(
         if (!userPicked) {
             JumpSequence(
                 isVisible = true,
-                spikeYdp = 300.dp,
+                spikeYdp = -340.dp,
                 onSpikeNearCenter = { isJumping = true }
             )
         }
 
-        //CHARACTER on top
+        //character on top center
         Box(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .padding(top = 40.dp)
-                .offset { IntOffset(0, characterYOffset.value.roundToInt()) }
+                .offset { IntOffset(0, animY.value.roundToInt()) }
         ) {
             if (isRunning) {
                 RunningCharacter(isRunning = true, modifier = Modifier.size(74.dp))
-            } else {
-                character() // fallback to Idle (unlikely)
+            }else{
+                character()
             }
         }
 
@@ -143,7 +142,7 @@ fun UserTypeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 32.dp, vertical = 80.dp),
+                    .padding(horizontal = 32.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -153,21 +152,19 @@ fun UserTypeScreen(
                     fontSize = 24.sp,
                     fontFamily = bubbleFont,
                     color = Color.White,
-                    modifier = Modifier.padding(bottom = 32.dp)
+                    modifier = Modifier.padding(bottom = 28.dp)
                 )
 
-                // CHILD BUTTON
+                //child button
                 AnimatedVisibility(
-                    visible = showButtons,
-                    enter = slideInHorizontally { full -> full } + fadeIn(),
-                    exit = fadeOut()
+                    visible = showButtons
                 ) {
                     CloudButtonTwo("I am a Child") {
                         userPicked = true
                         fadeOut = true
 
                         scope.launch {
-                            delay(400)
+                            delay(350)
                             navController.navigate("child_login_screen") {
                                 popUpTo("pick_user_screen") { inclusive = true }
                             }
@@ -175,20 +172,18 @@ fun UserTypeScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // PARENT BUTTON
+                //parent button
                 AnimatedVisibility(
-                    visible = showButtons,
-                    enter = slideInHorizontally { full -> full } + fadeIn(),
-                    exit = fadeOut()
+                    visible = showButtons
                 ) {
                     CloudButtonTwo("I am a Parent") {
                         userPicked = true
                         fadeOut = true
 
                         scope.launch {
-                            delay(400)
+                            delay(350)
                             navController.navigate("parent_login_screen") {
                                 popUpTo("pick_user_screen") { inclusive = true }
                             }

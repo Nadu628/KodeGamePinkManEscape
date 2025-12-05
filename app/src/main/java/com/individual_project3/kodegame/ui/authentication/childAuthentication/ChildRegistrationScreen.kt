@@ -42,12 +42,12 @@ fun showDatePicker(
     initialText: String?,
     onDateSelected: (String) -> Unit
 ) {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val inputFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
     val now = Calendar.getInstance()
 
     val initDate = try {
         if (!initialText.isNullOrBlank()) {
-            val parsed = LocalDate.parse(initialText, formatter)
+            val parsed = LocalDate.parse(initialText, inputFormatter)
             Calendar.getInstance().apply {
                 set(parsed.year, parsed.monthValue - 1, parsed.dayOfMonth)
             }
@@ -60,7 +60,8 @@ fun showDatePicker(
         context,
         { _, year, month, dayOfMonth ->
             val picked = LocalDate.of(year, month + 1, dayOfMonth)
-            onDateSelected(picked.format(formatter))
+            val formatted = picked.format(inputFormatter)
+            onDateSelected(formatted)
         },
         initDate.get(Calendar.YEAR),
         initDate.get(Calendar.MONTH),
@@ -69,16 +70,34 @@ fun showDatePicker(
 
     dpd.show()
 }
+
+
 @Composable
 fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewModel){
     val context = LocalContext.current
 
+    //formatters
+    val inputFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
+    val dbFormatter = DateTimeFormatter.ISO_LOCAL_DATE
+
+    //helper to convery MM/DD/YYYY -> yyyy-mm-dd
+    fun parseDobForDb(value: String): String? {
+        return try {
+            val parsed = LocalDate.parse(value, inputFormatter)
+            parsed.format(dbFormatter)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    //fields
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var dob by remember { mutableStateOf("") }
     var username by remember {mutableStateOf("")}
     var password by remember { mutableStateOf("") }
 
+    //errors
     var firstNameError by remember {mutableStateOf<String?>(null)}
     var lastNameError by remember {mutableStateOf<String?>(null)}
     var dobError by remember {mutableStateOf<String?>(null)}
@@ -86,7 +105,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
     var passwordError by remember {mutableStateOf<String?>(null)}
     var parentSelectionError by remember { mutableStateOf<String?>(null) }
 
-
+    //parent selection
     var expanded by remember{mutableStateOf(false)}
     var selectedParent: Parent? by remember{mutableStateOf(null)}
     var matchingParents by remember{mutableStateOf(listOf<Parent>())}
@@ -94,15 +113,14 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
     val bubbleFont = FontFamily(Font(R.font.poppins_bold))
     val gradient = Brush.verticalGradient(colors = listOf(Color(0xffb3e5fc), Color(0xffb2ff59)))
 
-    val formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy", Locale.US)
-
     //query parent when child enters name and dob
     LaunchedEffect(firstName, lastName, dob) {
-        if(firstName.isNotBlank() && lastName.isNotBlank() && dob.isNotBlank()){
-            viewModel.lookupParentsForChild(firstName.trim(), lastName.trim(), dob.trim()){ parents ->
+        val dobDb = parseDobForDb(dob)
+        if (firstName.isNotBlank() && lastName.isNotBlank() && dobDb != null) {
+            viewModel.lookupParentsForChild(firstName.trim(), lastName.trim(), dobDb) { parents ->
                 matchingParents = parents
             }
-        }else{
+        } else {
             matchingParents = emptyList()
             selectedParent = null
         }
@@ -120,70 +138,49 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
         return userRegex.matches(value.trim())
     }
 
-    //parse date string to LocalDate or return null
-    fun parseDate(value: String): LocalDate? {
-        return try {
-            LocalDate.parse(value, formatter)
-        } catch (e: DateTimeParseException) {
-            null
-        }
-    }
-
-
-
-    fun validateChildAll(): Boolean{
+    //validate inputs
+    fun validateChildAll(): Boolean {
         var ok = true
-        //child FN
-        firstNameError = when{
+
+        firstNameError = when {
             firstName.isBlank() -> "Enter your first name"
             !isValidName(firstName) -> "Must be 3-30 characters"
             else -> null
-        }
-        if (firstNameError != null) ok = false
+        }.also { if (it != null) ok = false }
 
-        // child last name
         lastNameError = when {
             lastName.isBlank() -> "Enter your last name"
-            !isValidName(lastName) -> "Must be 3-30 letters"
+            !isValidName(lastName) -> "Must be 3-30 characters"
             else -> null
-        }
-        if (lastNameError != null) ok = false
+        }.also { if (it != null) ok = false }
 
-        // child DOB
-        val cDOB = parseDate(dob)
+        val dobDb = parseDobForDb(dob)
         dobError = when {
             dob.isBlank() -> "Enter your date of birth"
-            cDOB == null -> "Use MM/DD/YYYY or pick from calendar"
+            dobDb == null -> "Use MM/DD/YYYY"
             else -> null
-        }
-        if (dobError != null) ok = false
+        }.also { if (it != null) ok = false }
 
-        // username
         usernameError = when {
             username.isBlank() -> "Enter a username"
             !isValidUsername(username) -> "Must be 3-30 letters or numbers"
             else -> null
-        }
-        if (usernameError != null) ok = false
+        }.also { if (it != null) ok = false }
 
-        // password
         passwordError = when {
             password.length < 6 -> "Password must be at least 6 characters"
             else -> null
-        }
-        if (passwordError != null) ok = false
+        }.also { if (it != null) ok = false }
 
-        // parent selection (must be linked)
         parentSelectionError = when {
-            selectedParent == null -> "Select a parent to link"
+            selectedParent == null -> "Select a parent"
             else -> null
-        }
-        if (parentSelectionError != null) ok = false
+        }.also { if (it != null) ok = false }
 
         return ok
-
     }
 
+    //UI Layout
     Box(
         modifier = Modifier.fillMaxSize().background(gradient),
         contentAlignment = Alignment.Center
@@ -254,24 +251,38 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
             Spacer(modifier = Modifier.height(12.dp))
 
             //parent dropbox
-            Box{
+            Box {
                 CloudButtonTwo(
-                    text = selectedParent?.let{"Parent: ${it.firstName} ${it.lastName}"} ?: "Select Parent",
-                    onClick = {expanded = true},
+                    text = selectedParent?.let { "Parent: ${it.firstName} ${it.lastName}" }
+                        ?: "Select Parent",
+                    onClick = { expanded = true },
                     modifier = Modifier.fillMaxWidth()
                 )
-                DropdownMenu(expanded = expanded, onDismissRequest = {expanded = false}) {
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
                     matchingParents.forEach { parent ->
                         DropdownMenuItem(
-                            text = {Text("${parent.firstName} ${parent.lastName}")},
+                            text = { Text("${parent.firstName} ${parent.lastName}") },
                             onClick = {
                                 selectedParent = parent
+                                parentSelectionError = null
                                 expanded = false
                             }
                         )
                     }
                 }
+            }
 
+            // Show error under dropdown
+            if (parentSelectionError != null) {
+                Text(
+                    text = parentSelectionError!!,
+                    color = Color.Red,
+                    modifier = Modifier.padding(start = 8.dp, top = 4.dp)
+                )
             }
             if(parentSelectionError != null){
                 Text(parentSelectionError!!, color = Color.Red)
@@ -327,45 +338,34 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                         .fillMaxWidth()
                         .height(52.dp),
                     onClick = {
-                        val ok = validateChildAll()
-                        if (ok) {
-                            selectedParent?.let { parent ->
-                                viewModel.registerChild(
-                                    parentId = parent.id,
-                                    first = firstName.trim(),
-                                    last = lastName.trim(),
-                                    dob = dob.trim(),
-                                    username = username.trim(),
-                                    password = password.trim()
-                                ) { childId ->
-                                    if (childId != null) {
-                                        Toast.makeText(
-                                            context,
-                                            "Child Registered",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        navController.navigate("child_login_screen") {
-                                            popUpTo("child_registration_screen") { inclusive = true }
-                                            launchSingleTop = true
-                                        }
-                                    } else {
-                                        Toast.makeText(
-                                            context,
-                                            "Registration failed",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
+                        if (!validateChildAll()) {
+                            Toast.makeText(context, "Fix errors", Toast.LENGTH_SHORT).show()
+                            return@CloudButtonTwo
+                        }
 
-                                    }
+                        val dobDb = parseDobForDb(dob)!!
+
+                        viewModel.registerChild(
+                            parentId = selectedParent!!.id,
+                            first = firstName.trim(),
+                            last = lastName.trim(),
+                            dob = dobDb,
+                            username = username.trim(),
+                            password = password.trim()
+                        ) { id ->
+                            if (id != null) {
+                                Toast.makeText(context, "Child Registered", Toast.LENGTH_SHORT).show()
+                                navController.navigate("child_login_screen") {
+                                    popUpTo("child_registration_screen") { inclusive = true }
                                 }
                             }
                         }
-                    })
-                Spacer(modifier = Modifier.height(12.dp))
-                CloudButtonTwo("Back") {
-                    navController.popBackStack()
-                }
+                    }
+                )
             }
+            Spacer(Modifier.height(12.dp))
 
+            CloudButtonTwo("Back") { navController.popBackStack() }
         }
     }
 

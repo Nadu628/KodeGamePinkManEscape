@@ -25,7 +25,7 @@ interface AuthDao{
     suspend fun findChildByUsername(username: String): Child?
 
     //lookup parent by child info in parent table
-    @Query("select * from parents where firstName = :childFirst and lastName = :childLast and dob = :childDob")
+    @Query("select * from parents where childFirstName = :childFirst and childLastName = :childLast and childDOB = :childDob")
     suspend fun findParentsByChildNameDob(childFirst: String, childLast: String, childDob: String): List<Parent>
 
     //observe parent with child

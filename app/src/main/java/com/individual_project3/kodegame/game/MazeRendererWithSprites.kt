@@ -10,6 +10,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
@@ -64,6 +65,14 @@ fun MazeRendererWithSprites(
                         topLeft = Offset(px, py),
                         size = Size(tileSizePx, tileSizePx)
                     )
+
+                    drawRect(
+                        color = Color.Black,
+                        topLeft = Offset(px, py),
+                        size = Size(tileSizePx, tileSizePx),
+                        style = Stroke(width = 2f)
+                    )
+
                 }
             }
 

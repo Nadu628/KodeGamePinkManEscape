@@ -1,11 +1,33 @@
 package com.individual_project3.kodegame.assets.commands
 
 sealed class Command {
+
     data class Move(val dir: Direction) : Command()
-    data class Repeat(val times: Int, val body: List<Command>) : Command()
-    data class IfHasStrawberries(val min: Int, val body: List<Command>) : Command()
+
+    data class Repeat(
+        val times: Int,
+        val body: List<Command>
+    ) : Command()
+
+    data class IfHasStrawberries(
+        val min: Int,
+        val body: List<Command>
+    ) : Command()
+
+    // NEW — Hard-mode commands
+    object RepeatUntilGoal : Command()
+    object RepeatWhileHasStrawberry : Command()
+
+    // Simple function system
+    object FunctionStart : Command()
+    object FunctionEnd : Command()
+    object FunctionCall : Command()
+
     object NoOp : Command()
 }
+
+
+
 
 object Commands {
 

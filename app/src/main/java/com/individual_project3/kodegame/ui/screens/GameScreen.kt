@@ -1,5 +1,6 @@
 package com.individual_project3.kodegame.ui.screens
 
+import android.graphics.Color.alpha
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -14,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
-import androidx.compose.animation.core.*
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.assets.sprites.SpriteManager
@@ -25,17 +25,25 @@ import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import com.individual_project3.kodegame.assets.commands.UiCommand
+import com.individual_project3.kodegame.assets.commands.toEngineCommands
 import com.individual_project3.kodegame.game.MazeRendererWithSprites
+import com.individual_project3.kodegame.ui.theme.bubbleFont
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -59,54 +67,47 @@ fun GameScreen(
     val animX = remember { Animatable(0f) }
     val animY = remember { Animatable(0f) }
     var playerFrameIndex by remember { mutableStateOf(0) }
+    val firstPositionSynced = vm.firstPositionSyncedFlag
 
-    var firstPositionSynced by remember { mutableStateOf(false) }
 
-    // ⭐ NEW: shared drag flag for palette/track highlighting
     val isDraggingFromPalette = remember { mutableStateOf(false) }
 
-    // ⭐ Player state shortcut for movement animation
-    val playerState = vm.playerState.value
-
-    // --- Load difficulty level once per difficulty ---
+    // Load maze on difficulty change
     LaunchedEffect(difficulty) {
-        firstPositionSynced = false
+        firstPositionSynced.value = false
         vm.generateNextLevel(difficulty)
     }
 
-    // --- Load sprites + music once ---
+    // Load sprites + music once
     LaunchedEffect(Unit) {
         spriteManager.preloadAllAsync(scope)
         vm.startBackgroundMusic(R.raw.sfx_game_music)
     }
 
-    // --- Animate movement based on player position ---
-    LaunchedEffect(playerState?.pos) {
-        val pos = playerState?.pos ?: return@LaunchedEffect
+    // Animate movement
+    LaunchedEffect(vm.playerState.value?.pos) {
+        val pos = vm.playerState.value?.pos ?: return@LaunchedEffect
 
-        if (!firstPositionSynced) {
+        if (!firstPositionSynced.value) {
             animX.snapTo(pos.x.toFloat())
             animY.snapTo(pos.y.toFloat())
-            firstPositionSynced = true
-            vm.playerAnimState.value = PlayerAnimState.Run
+            firstPositionSynced.value = true
         } else {
             animX.animateTo(
                 targetValue = pos.x.toFloat(),
-                animationSpec = tween(durationMillis = 200, easing = LinearEasing)
+                animationSpec = tween(200, easing = LinearEasing)
             )
             animY.animateTo(
                 targetValue = pos.y.toFloat(),
-                animationSpec = tween(durationMillis = 200, easing = LinearEasing)
+                animationSpec = tween(200, easing = LinearEasing)
             )
         }
     }
 
-    // --- Continuous sprite animation loop (only one effect) ---
+    // Continuous animation loop
     LaunchedEffect(Unit) {
         while (true) {
-            val state = vm.playerAnimState.value
-
-            val frames = when (state) {
+            val frames = when (vm.playerAnimState.value) {
                 PlayerAnimState.Jump -> spriteManager.playerJumpFrames
                 PlayerAnimState.Drop -> spriteManager.playerDropFrames
                 PlayerAnimState.Run  -> spriteManager.playerRunFrames
@@ -114,10 +115,10 @@ fun GameScreen(
                 else                 -> spriteManager.playerIdleFrames
             }
 
-            val frameDuration = when (state) {
-                PlayerAnimState.Hit -> 140L
-                PlayerAnimState.Jump, PlayerAnimState.Drop -> 120L
+            val duration = when (vm.playerAnimState.value) {
                 PlayerAnimState.Run -> 80L
+                PlayerAnimState.Jump, PlayerAnimState.Drop -> 120L
+                PlayerAnimState.Hit -> 140L
                 else -> 140L
             }
 
@@ -125,42 +126,43 @@ fun GameScreen(
                 playerFrameIndex = (playerFrameIndex + 1) % frames.size
             }
 
-            delay(frameDuration)
+            delay(duration)
         }
     }
 
-    // ---------------- UI ----------------
+    // ------------------------------------------------------------------
+    // UI LAYOUT
+    // ------------------------------------------------------------------
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(gradient)
-            .padding(16.dp),
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        // === TOP BAR =========================
+        // -------------------- TOP BAR -------------------------
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
+            Spacer(modifier = Modifier.height(4.dp))
             // Row 1: Back | Mode | Exit
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
+                    .padding(horizontal = 4.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CloudButtonTwo(
                     text = "Back",
-                    modifier = Modifier.width(90.dp),
+                    modifier = Modifier.width(110.dp),
                     onClick = {
-                        if (onBack != null) onBack()
-                        else navController.popBackStack()
+                        onBack?.invoke() ?: navController.popBackStack()
                     }
                 )
 
@@ -168,92 +170,202 @@ fun GameScreen(
                     text = "Mode: ${difficulty.name}",
                     fontFamily = bubbleFont,
                     fontSize = 16.sp,
-                    color = Color.White,
-                    modifier = Modifier.padding(horizontal = 6.dp)
+                    color = Color.White
                 )
 
                 CloudButtonTwo(
                     text = "Exit",
-                    modifier = Modifier.width(90.dp),
+                    modifier = Modifier.width(110.dp),
                     onClick = {
                         navController.navigate("difficulty_screen") {
                             popUpTo("game_screen") { inclusive = true }
-                            launchSingleTop = true
                         }
                     }
                 )
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
 
-            // Row 2: Next | Reset | Play (single row, no duplicates)
+            // Row 2: Next | Reset | Play
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.Center
             ) {
                 CloudButtonTwo(
                     text = "Next",
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .width(90.dp),
+                    modifier = Modifier.width(110.dp),
                     onClick = {
-                        firstPositionSynced = false
+                        firstPositionSynced.value = false
                         vm.generateNextLevel(difficulty)
                     }
                 )
 
                 CloudButtonTwo(
                     text = "Reset",
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .width(90.dp),
+                    modifier = Modifier.width(110.dp),
                     onClick = {
                         vm.cancelProgram()
                         vm.resetPlayerToStart()
-                        firstPositionSynced = false
+                        firstPositionSynced.value = false
                     }
                 )
 
                 CloudButtonTwo(
                     text = "Play",
-                    modifier = Modifier
-                        .padding(horizontal = 4.dp)
-                        .width(90.dp),
+                    modifier = Modifier.width(110.dp),
                     onClick = {
                         if (!vm.isProgramRunning.value) {
-                            vm.runUiProgram(stepDelayMs = 300L)
+
+                            val frozenUiProgram = vm.uiProgram.toList()
+                            val engineProgram = frozenUiProgram.flatMap { it.toEngineCommands() }
+                            vm.setLastProgram(engineProgram)
+
+                            vm.runLastProgram(stepDelayMs = 300L)
                         }
                     }
                 )
+            }
+        }
 
+        Spacer(Modifier.height(4.dp))
+
+        // ---------------------- MAZE -------------------------
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(0.8f),
+            contentAlignment = Alignment.Center
+        ) {
+            val maze = vm.currentMaze.value
+
+            if (maze == null) {
+                Text("Loading...", color = Color.White)
+            } else {
+                BoxWithConstraints(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    val tileSizeDp = maxWidth / maze.width
+
+                    val frame = when (vm.playerAnimState.value) {
+                        PlayerAnimState.Jump -> spriteManager.playerJumpFrames.getOrNull(playerFrameIndex)
+                        PlayerAnimState.Drop -> spriteManager.playerDropFrames.getOrNull(playerFrameIndex)
+                        PlayerAnimState.Run  -> spriteManager.playerRunFrames.getOrNull(playerFrameIndex)
+                        PlayerAnimState.Hit  -> spriteManager.playerHitFrames.getOrNull(playerFrameIndex)
+                        else -> spriteManager.playerIdleFrames.getOrNull(playerFrameIndex)
+                    }
+
+                    MazeRendererWithSprites(
+                        maze = maze,
+                        playerImage = frame,
+                        playerAnimX = animX.value,
+                        playerAnimY = animY.value,
+                        spriteManager = spriteManager,
+                        tileSizeDp = tileSizeDp
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(4.dp))
+
+        // ---------------- PROGRAM TRACK (DROP AREA) -----------------
+        ProgramTrackBar(
+            program = vm.uiProgram,
+            onRemoveAt = { vm.removeUiCommandAt(it) },
+            dropActive = isDraggingFromPalette.value
+        )
+
+        Spacer(Modifier.height(6.dp))
+
+        // -------------- DRAGGABLE COMMAND PALETTE -------------------
+        CommandPaletteBar(
+            difficulty = difficulty,
+            onAddCommand = { vm.addUiCommand(it) },
+            isDraggingFromPalette = isDraggingFromPalette
+        )
+    }
+}
 
 @Composable
 fun CommandPaletteBar(
+    difficulty: DifficultyMode,
     onAddCommand: (UiCommand) -> Unit,
     isDraggingFromPalette: MutableState<Boolean>
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        DraggableCommandIcon("↑", UiCommand.MoveUp, onAddCommand, isDraggingFromPalette)
-        DraggableCommandIcon("↓", UiCommand.MoveDown, onAddCommand, isDraggingFromPalette)
-        DraggableCommandIcon("←", UiCommand.MoveLeft, onAddCommand, isDraggingFromPalette)
-        DraggableCommandIcon("→", UiCommand.MoveRight, onAddCommand, isDraggingFromPalette)
+
+        Text(
+            "Commands",
+            color = Color.White,
+            fontFamily = bubbleFont,
+            fontSize = 16.sp
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            val blockSize = 72.dp
+
+            DraggableCommandIcon("↑", UiCommand.MoveUp, onAddCommand, isDraggingFromPalette, blockSize)
+            DraggableCommandIcon("↓", UiCommand.MoveDown, onAddCommand, isDraggingFromPalette, blockSize)
+            DraggableCommandIcon("←", UiCommand.MoveLeft, onAddCommand, isDraggingFromPalette, blockSize)
+            DraggableCommandIcon("→", UiCommand.MoveRight, onAddCommand, isDraggingFromPalette, blockSize)
+        }
+
+        Spacer(Modifier.height(6.dp))
+
+        if (difficulty == DifficultyMode.EASY) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                DraggableCommandIcon("Repeat 3×", UiCommand.Repeat(3), onAddCommand, isDraggingFromPalette, 90.dp)
+                DraggableCommandIcon("If 🍓", UiCommand.IfHasStrawberry, onAddCommand, isDraggingFromPalette, 90.dp)
+            }
+        }
+
+        if (difficulty == DifficultyMode.HARD) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                DraggableCommandIcon("Repeat 5×", UiCommand.Repeat(5), onAddCommand, isDraggingFromPalette, 90.dp)
+                DraggableCommandIcon("If 🍓", UiCommand.IfHasStrawberry, onAddCommand, isDraggingFromPalette, 90.dp)
+                DraggableCommandIcon("Until 🏁", UiCommand.RepeatUntilGoal, onAddCommand, isDraggingFromPalette, 90.dp)
+                DraggableCommandIcon("Func⟦⟧", UiCommand.FunctionStart, onAddCommand, isDraggingFromPalette, 90.dp)
+            }
+        }
     }
 }
+
 
 @Composable
 fun DraggableCommandIcon(
     label: String,
     command: UiCommand,
     onAddCommand: (UiCommand) -> Unit,
-    isDraggingFromPalette: MutableState<Boolean>
+    isDraggingFromPalette: MutableState<Boolean>,
+    size: Dp = 64.dp
 ) {
-    var isDragging by remember { mutableStateOf(false) }
     var dragOffset by remember { mutableStateOf(Offset.Zero) }
+    var isDragging by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -287,15 +399,14 @@ fun DraggableCommandIcon(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.White, RoundedCornerShape(14.dp)),
+                .background(Color.White, RoundedCornerShape(12.dp))
+                .border(2.dp, Color.Black, RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             Text(label, fontSize = 28.sp, color = Color.Black)
         }
     }
 }
-
-
 
 @Composable
 fun ProgramTrackBar(
@@ -308,25 +419,51 @@ fun ProgramTrackBar(
     else
         Color.White.copy(alpha = 0.8f)
 
-    LazyRow(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(70.dp)
+            .height(80.dp)
             .background(bgColor, RoundedCornerShape(16.dp))
-            .padding(horizontal = 8.dp, vertical = 6.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 8.dp, vertical = 6.dp)
     ) {
-        itemsIndexed(program) { index, cmd ->
-            val label = when (cmd) {
-                UiCommand.MoveUp -> "↑"
-                UiCommand.MoveDown -> "↓"
-                UiCommand.MoveLeft -> "←"
-                UiCommand.MoveRight -> "→"
-            }
+        if (program.isEmpty()) {
+            Text(
+                "Tap or drag arrows to build a path!",
+                fontSize = 14.sp,
+                color = Color.Black.copy(alpha = 0.7f)
+            )
+        } else {
+            LazyRow(
+                modifier = Modifier.fillMaxSize(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                itemsIndexed(program) { index, cmd ->
 
-            DraggableTrackBlock(label) {
-                onRemoveAt(index)  // tap or drag out to remove
+                    val label = when (cmd) {
+
+                        UiCommand.MoveUp -> "↑"
+                        UiCommand.MoveDown -> "↓"
+                        UiCommand.MoveLeft -> "←"
+                        UiCommand.MoveRight -> "→"
+
+                        is UiCommand.Repeat -> "Repeat ${cmd.times}×"
+                        UiCommand.IfHasStrawberry -> "If 🍓"
+
+                        UiCommand.RepeatUntilGoal -> "Until 🏁"
+                        UiCommand.RepeatWhileHasStrawberry -> "While 🍓"
+
+                        UiCommand.FunctionStart -> "Func⟦⟧"
+                        UiCommand.EndFunction -> "End Func"
+                        UiCommand.FunctionCall -> "Call Func"
+                    }
+
+
+
+                    DraggableTrackBlock(label) {
+                        onRemoveAt(index)
+                    }
+                }
             }
         }
     }
@@ -337,26 +474,23 @@ fun DraggableTrackBlock(
     label: String,
     onRemove: () -> Unit
 ) {
-    var isDragging by remember { mutableStateOf(false) }
-
     Box(
         modifier = Modifier
             .size(48.dp)
             .background(Color(0xFFE1F5FE), RoundedCornerShape(12.dp))
             .pointerInput(Unit) {
                 detectDragGestures(
-                    onDragStart = { isDragging = true },
+                    onDragStart = {},
                     onDrag = { change, _ -> change.consume() },
-                    onDragEnd = {
-                        isDragging = false
-                        onRemove()
-                    },
-                    onDragCancel = { isDragging = false }
+                    onDragEnd = { onRemove() },
+                    onDragCancel = {}
                 )
             }
-            .clickable(enabled = !isDragging) { onRemove() },
+            .clickable { onRemove() },
         contentAlignment = Alignment.Center
     ) {
         Text(label, fontSize = 24.sp)
     }
 }
+
+

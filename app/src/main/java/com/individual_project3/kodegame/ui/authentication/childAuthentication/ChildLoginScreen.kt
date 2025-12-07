@@ -21,6 +21,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,7 +39,9 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.R
+import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
@@ -48,6 +51,13 @@ fun ChildLoginScreen(
     navController: NavController,
     viewModel: AuthViewModel) {
     val context = LocalContext.current
+
+    val audio = KodeGameApp.audio
+
+    LaunchedEffect(Unit) {
+        audio.loadSfx(R.raw.sfx_button_click)
+    }
+
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -117,7 +127,7 @@ fun ChildLoginScreen(
                 trailingIcon = {
                     val icon =
                         if (passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                    IconButton(onClick = { passwordVisible = !passwordVisible; audio.play(R.raw.sfx_button_click)}) {
                         Icon(
                             imageVector = icon,
                             contentDescription = if (passwordVisible) "Hide password" else "Show password"
@@ -139,6 +149,7 @@ fun ChildLoginScreen(
                     if (validateALl()) {
                         viewModel.loginChild(username, password) { child ->
                             if (child != null) {
+                                audio.play(R.raw.sfx_button_click)
                                 navController.navigate("difficulty_screen")
                             } else {
                                 Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT)
@@ -151,12 +162,14 @@ fun ChildLoginScreen(
             }
             Spacer(modifier = Modifier.height(16.dp))
             CloudButtonTwo("Register") {
+                audio.play(R.raw.sfx_button_click)
                 navController.navigate("child_registration_screen")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             CloudButtonTwo("Back") {
+                audio.play(R.raw.sfx_button_click)
                 navController.navigate("pick_user_screen")
             }
         }

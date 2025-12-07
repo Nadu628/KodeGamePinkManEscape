@@ -20,9 +20,11 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import com.individual_project3.kodegame.R
 import androidx.navigation.NavController
+import com.individual_project3.kodegame.assets.audio.AudioManager
 import kotlinx.coroutines.launch
 
 @Composable
@@ -43,6 +45,14 @@ fun SplashScreen(navController: NavController) {
     )
 
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val audio = remember { AudioManager(context) }
+
+// load just click sound
+    LaunchedEffect(Unit) {
+        audio.loadSfx(R.raw.sfx_button_click)
+    }
+
 
     LaunchedEffect(Unit) {
         delay(3000)
@@ -52,6 +62,7 @@ fun SplashScreen(navController: NavController) {
 
     fun handleTap() {
         if (!showPrompt) return
+        audio.play(R.raw.sfx_button_click)
         fadeOut = true
 
         scope.launch {

@@ -1,6 +1,5 @@
 package com.individual_project3.kodegame.assets.commands
 
-
 // Visual / UI commands that correspond to blocks the child drags
 sealed class UiCommand {
 
@@ -9,22 +8,38 @@ sealed class UiCommand {
     object MoveLeft : UiCommand()
     object MoveRight : UiCommand()
 
-    data class Repeat(val times: Int) : UiCommand()
+    // repeat N { body }
+    data class Repeat(
+        val times: Int,
+        val body: MutableList<UiCommand> = mutableListOf()
+    ) : UiCommand()
 
-    object IfHasStrawberry : UiCommand()
+    // if has at least 1 strawberry { body }
+    data class IfHasStrawberry(
+        val body: MutableList<UiCommand> = mutableListOf()
+    ) : UiCommand()
 
+    // repeat until goal reached { body }
+    data class RepeatUntilGoal(
+        val body: MutableList<UiCommand> = mutableListOf()
+    ) : UiCommand()
+
+    // while strawberries > 0 { body }
+    data class RepeatWhileHasStrawberry(
+        val body: MutableList<UiCommand> = mutableListOf()
+    ) : UiCommand()
+
+    // function markers in the UI
     object FunctionStart : UiCommand()
+    object EndFunction : UiCommand()
     object FunctionCall : UiCommand()
-    object EndFunction : UiCommand()  // optional UI use
 
-    object RepeatUntilGoal : UiCommand()
-    object RepeatWhileHasStrawberry : UiCommand()
+    // explicit function body (for later)
+    data class FunctionDefinition(
+        val body: MutableList<UiCommand> = mutableListOf()
+    ) : UiCommand()
 }
 
-
-
-
-// Map visual blocks to engine commands
 fun UiCommand.toEngineCommands(): List<Command> = when (this) {
 
     UiCommand.MoveUp    -> listOf(Command.Move(Direction.UP))
@@ -35,17 +50,38 @@ fun UiCommand.toEngineCommands(): List<Command> = when (this) {
     is UiCommand.Repeat -> listOf(
         Command.Repeat(
             times = this.times,
-            body = emptyList() // UI does NOT build nested commands yet — safe placeholder
+            body = this.body.flatMap { it.toEngineCommands() }
         )
     )
 
-    UiCommand.IfHasStrawberry ->
-        listOf(Command.IfHasStrawberries(min = 1, body = emptyList()))
+    is UiCommand.IfHasStrawberry -> listOf(
+        Command.IfHasStrawberries(
+            min = 1,
+            body = this.body.flatMap { it.toEngineCommands() }
+        )
+    )
 
-    UiCommand.FunctionStart -> listOf(Command.FunctionStart)
-    UiCommand.EndFunction   -> listOf(Command.FunctionEnd)
-    UiCommand.FunctionCall  -> listOf(Command.FunctionCall)
+    is UiCommand.RepeatUntilGoal -> listOf(
+        Command.RepeatUntilGoal(
+            body = this.body.flatMap { it.toEngineCommands() }
+        )
+    )
 
-    UiCommand.RepeatUntilGoal -> listOf(Command.NoOp) // placeholder
-    UiCommand.RepeatWhileHasStrawberry -> listOf(Command.NoOp) // placeholder
+    is UiCommand.RepeatWhileHasStrawberry -> listOf(
+        Command.RepeatWhileHasStrawberries(
+            body = this.body.flatMap { it.toEngineCommands() }
+        )
+    )
+
+    // One function definition per program
+    is UiCommand.FunctionDefinition -> listOf(
+        Command.FunctionDefinition(
+            body = this.body.flatMap { it.toEngineCommands() }
+        )
+    )
+
+    UiCommand.FunctionCall -> listOf(Command.FunctionCall)
+
+    UiCommand.FunctionStart -> emptyList() // UI-only markers
+    UiCommand.EndFunction -> emptyList()
 }

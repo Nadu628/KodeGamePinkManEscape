@@ -1,4 +1,4 @@
-package com.individual_project3.kodegame.game
+package com.individual_project3.kodegame.ui.viewModel
 
 import android.content.Context
 import android.util.Log
@@ -15,46 +15,60 @@ import com.individual_project3.kodegame.assets.commands.PlayerState
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.assets.commands.Command
 import com.individual_project3.kodegame.assets.commands.CommandEngine
-import com.individual_project3.kodegame.assets.commands.Commands
 import com.individual_project3.kodegame.assets.commands.ExecEvent
+import com.individual_project3.kodegame.assets.commands.NestedProgramParser
 import com.individual_project3.kodegame.assets.commands.Pos
 import com.individual_project3.kodegame.assets.commands.UiCommand
 import com.individual_project3.kodegame.assets.commands.toEngineCommands
 import com.individual_project3.kodegame.data.db.AppDatabase
-import com.individual_project3.kodegame.data.progress.ChildProgressEntity
+import com.individual_project3.kodegame.data.progress.ProgressRecord
+import com.individual_project3.kodegame.game.DifficultyMode
+import com.individual_project3.kodegame.game.MazeLevel
+import com.individual_project3.kodegame.game.MazeModel
+import com.individual_project3.kodegame.game.TileType
 
 enum class PlayerAnimState { Idle, Run, Jump, Drop, Hit }
 
 class MazeViewModel(
     private val mazeModel: MazeModel,
-    val audioManager: AudioManager
+    val audioManager: AudioManager,
+    val context: Context
 ) : ViewModel() {
+
+    // ---------- STATE ----------
 
     val currentMaze = mutableStateOf<Maze?>(null)
     val playerState = mutableStateOf<PlayerState?>(null)
+
     val execLog = mutableStateListOf<String>()
     val isProgramRunning = mutableStateOf(false)
     val isLoading = mutableStateOf(false)
+
     val playerAnimState = mutableStateOf(PlayerAnimState.Idle)
     val firstPositionSyncedFlag = mutableStateOf(false)
-    private var functionBody: List<Command> = emptyList()
+
     val totalStrawberries = mutableStateOf(0)
     val levelsCompleted = mutableStateOf(0)
-
-
 
     var lastProgram: List<Command> = emptyList()
         private set
 
+    val levelCompleted = mutableStateOf(false)
+
+    // blocks the kid dropped
     val uiProgram = mutableStateListOf<UiCommand>()
 
     private var programJob: Job? = null
     private var animResetJob: Job? = null
 
+    // ---------- FACTORY ----------
+
     class Factory(private val context: Context) : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            val audio = AudioManager(context.applicationContext)
+            val appContext = context.applicationContext
+            val audio = AudioManager(appContext)
 
+            // pre-load sounds
             audio.loadSfx(
                 R.raw.sfx_jump,
                 R.raw.sfx_drop,
@@ -64,12 +78,13 @@ class MazeViewModel(
             )
 
             val model = MazeModel()
+
             @Suppress("UNCHECKED_CAST")
-            return MazeViewModel(model, audio) as T
+            return MazeViewModel(model, audio, appContext) as T
         }
     }
 
-    fun parseProgramFromText(text: String): List<Command> = Commands.parseProgram(text)
+    // ---------- AUDIO ----------
 
     fun startBackgroundMusic(@RawRes musicRes: Int) {
         audioManager.startBackground(musicRes)
@@ -78,6 +93,13 @@ class MazeViewModel(
     fun stopBackgroundMusic() {
         audioManager.stopBackground()
     }
+    // --- NEW: button click sound ---
+    fun playClick() {
+        audioManager.play(R.raw.sfx_button_click)
+    }
+
+
+    // ---------- UI PROGRAM (BLOCKS) ----------
 
     fun addUiCommand(cmd: UiCommand) {
         uiProgram.add(cmd)
@@ -87,61 +109,32 @@ class MazeViewModel(
         if (index in uiProgram.indices) uiProgram.removeAt(index)
     }
 
+    /**
+     * Called when the child presses PLAY.
+     * Converts the block list -> Command tree, then runs it.
+     */
     fun runUiProgram(stepDelayMs: Long = 350L) {
         if (uiProgram.isEmpty()) {
             appendLog("Program is empty")
             return
         }
-        val engineProgram = uiProgram.flatMap { it.toEngineCommands() }
+
+        // Freeze current UI program (so changes while running don’t break it)
+        val snapshot = uiProgram.toList()
+
+        //Uses the extension we just defined
+        val engineProgram = snapshot.flatMap { it.toEngineCommands() }
+
         setLastProgram(engineProgram)
         runLastProgram(stepDelayMs)
     }
 
+
+
     fun setLastProgram(program: List<Command>) {
-        // Extract function if present
-        val extracted = extractFunction(program)
-        functionBody = extracted.functionBody
-        lastProgram = extracted.mainProgram
+        lastProgram = program
+        appendLog("Program set (${program.size} commands)")
     }
-
-    private data class ExtractedProgram(
-        val mainProgram: List<Command>,
-        val functionBody: List<Command>
-    )
-
-    private fun extractFunction(program: List<Command>): ExtractedProgram {
-        val main = mutableListOf<Command>()
-        val func = mutableListOf<Command>()
-
-        var collectingFunction = false
-
-        for (cmd in program) {
-            when (cmd) {
-                Command.FunctionStart -> {
-                    collectingFunction = true
-                    func.clear()
-                }
-
-                Command.FunctionEnd -> {
-                    collectingFunction = false
-                }
-
-                is Command.FunctionCall -> {
-                    main.add(cmd)
-                }
-
-                else -> {
-                    if (collectingFunction) func.add(cmd)
-                    else main.add(cmd)
-                }
-            }
-        }
-
-        return ExtractedProgram(mainProgram = main, functionBody = func)
-    }
-
-
-
 
     fun runLastProgram(stepDelayMs: Long = 350L) {
         if (lastProgram.isEmpty()) {
@@ -151,10 +144,11 @@ class MazeViewModel(
         runProgram(lastProgram, stepDelayMs)
     }
 
-    // ------- LEVEL / MAZE -------
+    // ---------- LEVEL / MAZE ----------
 
     fun generateNextLevel(mode: DifficultyMode = DifficultyMode.EASY) {
         isLoading.value = true
+        levelCompleted.value = false
         viewModelScope.launch {
             val level = withContext(Dispatchers.Default) { mazeModel.nextLevel(mode) }
             val maze = convertMazeLevelToMaze(level)
@@ -171,6 +165,7 @@ class MazeViewModel(
             uiProgram.clear()
 
             playerAnimState.value = PlayerAnimState.Idle
+            firstPositionSyncedFlag.value = false
 
             isLoading.value = false
         }
@@ -201,7 +196,6 @@ class MazeViewModel(
         val startPos = startPair?.let { Pos(x = it.second, y = it.first) } ?: Pos(0, 0)
         val goalPos  = exitPair ?.let { Pos(x = it.second, y = it.first) }
 
-        // --- Build initial maze ---
         var maze = Maze(
             width = grid.width,
             height = grid.height,
@@ -212,7 +206,8 @@ class MazeViewModel(
             goal = goalPos
         )
 
-        // --- BFS helper to get neighbors ---
+        // --- BFS helpers to keep spikes off main path ---
+
         fun neighborsOf(p: Pos): List<Pos> =
             listOf(
                 Pos(p.x + 1, p.y),
@@ -225,7 +220,6 @@ class MazeViewModel(
                         it !in maze.walls
             }
 
-        // --- BFS to extract the main solution path ---
         fun bfsPath(start: Pos, goal: Pos?): List<Pos> {
             if (goal == null) return emptyList()
 
@@ -260,7 +254,6 @@ class MazeViewModel(
 
         val mainPath = bfsPath(startPos, goalPos)
 
-        // --- Expand safe zone around solution path ---
         val safeZone = mainPath.flatMap { p ->
             listOf(
                 p,
@@ -271,80 +264,17 @@ class MazeViewModel(
             )
         }.toSet()
 
-        // --- Remove enemies that sit on or near the correct path ---
         val filteredEnemies = enemies.filterNot { it in safeZone }.toSet()
 
-        // --- Return cleaned maze ---
         return maze.copy(enemies = filteredEnemies)
     }
 
-    private fun computeMainPath(
-        width: Int,
-        height: Int,
-        walls: Set<Pos>,
-        start: Pos,
-        goal: Pos?
-    ): Set<Pos> {
-        if (goal == null) return emptySet()
-
-        val directions = listOf(
-            Pos(0, -1), // up
-            Pos(0, 1),  // down
-            Pos(-1, 0), // left
-            Pos(1, 0)   // right
-        )
-
-        val visited = Array(height) { BooleanArray(width) }
-        val parent = mutableMapOf<Pos, Pos?>()
-
-        val queue = ArrayDeque<Pos>()
-        queue.add(start)
-        visited[start.y][start.x] = true
-        parent[start] = null
-
-        var found = false
-
-        while (queue.isNotEmpty()) {
-            val current = queue.removeFirst()
-            if (current == goal) {
-                found = true
-                break
-            }
-
-            for (d in directions) {
-                val nx = current.x + d.x
-                val ny = current.y + d.y
-
-                if (nx !in 0 until width || ny !in 0 until height) continue
-                if (visited[ny][nx]) continue
-
-                val next = Pos(nx, ny)
-                if (next in walls) continue
-
-                visited[ny][nx] = true
-                parent[next] = current
-                queue.add(next)
-            }
-        }
-
-        if (!found) return emptySet()
-
-        // Reconstruct path from goal → start
-        val path = mutableSetOf<Pos>()
-        var cur: Pos? = goal
-        while (cur != null) {
-            path.add(cur)
-            cur = parent[cur]
-        }
-        return path
-    }
-
-    // ------- PROGRAM EXECUTION -------
+    // ---------- PROGRAM EXECUTION ----------
 
     fun runProgram(program: List<Command>, stepDelayMs: Long = 350L) {
         val maze = currentMaze.value ?: run { appendLog("No maze loaded"); return }
         val player = playerState.value ?: run { appendLog("No player state"); return }
-
+        levelCompleted.value = false
         programJob?.cancel()
         val engine = CommandEngine(maze)
 
@@ -429,7 +359,6 @@ class MazeViewModel(
                     )
                 }
 
-                //remove berry from Maze object
                 currentMaze.value?.let { maze ->
                     val updated = maze.strawberries.toMutableSet()
                     updated.remove(event.pos)
@@ -479,12 +408,20 @@ class MazeViewModel(
 
             is ExecEvent.Success -> {
                 appendLog("Level success at ${event.pos}")
+
                 levelsCompleted.value += 1
-                saveProgressToDatabase()
+                levelCompleted.value = true   // --- NEW ---
+
+                val strawberries = playerState.value?.strawberries ?: 0
+                val levelNum = mazeModel.currentLevelIndex
+
+                saveProgressRecord(strawberries, levelNum)
+
                 isProgramRunning.value = false
                 audioManager.play(R.raw.sfx_success)
                 playerAnimState.value = PlayerAnimState.Idle
             }
+
 
             is ExecEvent.Log -> appendLog("Log: ${event.message}")
 
@@ -497,23 +434,26 @@ class MazeViewModel(
         }
     }
 
-    fun saveProgressToDatabase(context: Context) {
+    private fun saveProgressRecord(strawberries: Int, level: Int) {
+        val childId = 1   // TODO later: real logged-in child id
+
         viewModelScope.launch(Dispatchers.IO) {
-
-            val entity = ChildProgressEntity(
-                childId = "child1",                  // replace later with real childId
-                totalStrawberries = totalStrawberries.value,
-                levelsCompleted = levelsCompleted.value
+            val record = ProgressRecord(
+                childId = childId,
+                level = level,
+                strawberries = strawberries,
+                completed = true
             )
-
             val db = AppDatabase.getInstance(context)
-            db.progressDao().insertRecord(entity)
+            db.progressDao().insertRecord(record)
         }
     }
 
     fun resetPlayerToStart() {
+        levelCompleted.value = false
         val maze = currentMaze.value ?: return
         val ps = playerState.value ?: return
+        firstPositionSyncedFlag.value = false
 
         playerState.value = ps.copy(
             pos = maze.start,
@@ -547,3 +487,87 @@ class MazeViewModel(
         animResetJob?.cancel()
     }
 }
+
+
+fun buildStructuredProgram(uiList: List<UiCommand>): List<UiCommand> {
+    val stack = ArrayDeque<MutableList<UiCommand>>()  // nested structure
+    val root = mutableListOf<UiCommand>()
+
+    stack.add(root)
+
+    var collectingFunction = false
+    var functionBlock: MutableList<UiCommand>? = null
+
+    for (cmd in uiList) {
+        when (cmd) {
+
+            // ---------------------- FUNCTION START ----------------------
+            UiCommand.FunctionStart -> {
+                collectingFunction = true
+                functionBlock = mutableListOf()
+            }
+
+            // ---------------------- FUNCTION END ------------------------
+            UiCommand.EndFunction -> {
+                collectingFunction = false
+                val fnBody = functionBlock ?: mutableListOf()
+                stack.last().add(UiCommand.FunctionDefinition(fnBody))
+                functionBlock = null
+            }
+
+            // ----------------------- REPEAT (N) -------------------------
+            is UiCommand.Repeat -> {
+                val newBlock = mutableListOf<UiCommand>()
+                val repeatCmd = UiCommand.Repeat(cmd.times, newBlock)
+
+                if (collectingFunction) functionBlock!!.add(repeatCmd)
+                else stack.last().add(repeatCmd)
+
+                stack.add(newBlock)
+            }
+
+            // ----------------------- IF 🍓 -------------------------
+            is UiCommand.IfHasStrawberry -> {
+                val newBlock = mutableListOf<UiCommand>()
+                val ifCmd = UiCommand.IfHasStrawberry(newBlock)
+
+                if (collectingFunction) functionBlock!!.add(ifCmd)
+                else stack.last().add(ifCmd)
+
+                stack.add(newBlock)
+            }
+
+            // ------------------ UNTIL GOAL ---------------------
+            is UiCommand.RepeatUntilGoal -> {
+                val newBlock = mutableListOf<UiCommand>()
+                val until = UiCommand.RepeatUntilGoal(newBlock)
+
+                if (collectingFunction) functionBlock!!.add(until)
+                else stack.last().add(until)
+
+                stack.add(newBlock)
+            }
+
+            // ------------------ WHILE STRAWBERRY > 0 ----------------------
+            is UiCommand.RepeatWhileHasStrawberry -> {
+                val newBlock = mutableListOf<UiCommand>()
+                val whileCmd = UiCommand.RepeatWhileHasStrawberry(newBlock)
+
+                if (collectingFunction) functionBlock!!.add(whileCmd)
+                else stack.last().add(whileCmd)
+
+                stack.add(newBlock)
+            }
+
+            // ------------------- SIMPLE COMMAND -------------------------
+            else -> {
+                if (collectingFunction) functionBlock!!.add(cmd)
+                else stack.last().add(cmd)
+            }
+        }
+    }
+
+    return root
+}
+
+

@@ -43,6 +43,8 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.runtime.LaunchedEffect
+import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 
 @Composable
@@ -51,6 +53,11 @@ fun ParentLoginScreen(
     viewModel: AuthViewModel = viewModel())
 {
     val context = LocalContext.current
+
+    val audio = remember { AudioManager(context) }
+    LaunchedEffect(Unit) {
+        audio.loadSfx(R.raw.sfx_button_click)
+    }
 
     //UI state
     var email by remember { mutableStateOf("") }
@@ -118,7 +125,7 @@ fun ParentLoginScreen(
                 visualTransformation = if(passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     val icon = if(passwordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility
-                    IconButton(onClick = {passwordVisible = !passwordVisible }){
+                    IconButton(onClick = {passwordVisible = !passwordVisible; audio.play(R.raw.sfx_button_click) }){
                         Icon(imageVector = icon, contentDescription = if(passwordVisible) "Hide password" else "Show password")
 
                     }
@@ -141,7 +148,7 @@ fun ParentLoginScreen(
                 CloudButtonTwo("Login") {
                     viewModel.loginParent(email, password){id ->
                         if(id != null){
-                            navController.navigate("parent_progress_screen")
+                            navController.navigate("parent_dashboard/$id")
                         }else{
                             Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
                         }
@@ -152,6 +159,7 @@ fun ParentLoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
             CloudButtonTwo("Register") {
+                audio.play(R.raw.sfx_button_click)
                 navController.navigate("parent_registration_screen")
             }
 

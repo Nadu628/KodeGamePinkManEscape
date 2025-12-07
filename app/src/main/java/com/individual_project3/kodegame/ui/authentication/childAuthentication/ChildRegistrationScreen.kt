@@ -30,7 +30,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.input.KeyboardType
+import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.R
+import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
 import java.time.format.DateTimeParseException
@@ -75,6 +77,12 @@ fun showDatePicker(
 @Composable
 fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewModel){
     val context = LocalContext.current
+
+    val audio = KodeGameApp.audio
+
+    LaunchedEffect(Unit) {
+        audio.loadSfx(R.raw.sfx_button_click)
+    }
 
     //formatters
     val inputFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
@@ -236,6 +244,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                 errorText = dobError,
                 trailingIcon = {
                     IconButton(onClick = {
+                        audio.play(R.raw.sfx_button_click)
                         showDatePicker(context, dob) { picked ->
                             dob = picked
                         }
@@ -255,7 +264,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                 CloudButtonTwo(
                     text = selectedParent?.let { "Parent: ${it.firstName} ${it.lastName}" }
                         ?: "Select Parent",
-                    onClick = { expanded = true },
+                    onClick = { expanded = true; audio.play(R.raw.sfx_button_click) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -267,6 +276,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                         DropdownMenuItem(
                             text = { Text("${parent.firstName} ${parent.lastName}") },
                             onClick = {
+                                audio.play(R.raw.sfx_button_click)
                                 selectedParent = parent
                                 parentSelectionError = null
                                 expanded = false
@@ -338,6 +348,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                         .fillMaxWidth()
                         .height(52.dp),
                     onClick = {
+                        audio.play(R.raw.sfx_button_click)
                         if (!validateChildAll()) {
                             Toast.makeText(context, "Fix errors", Toast.LENGTH_SHORT).show()
                             return@CloudButtonTwo
@@ -365,7 +376,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
             }
             Spacer(Modifier.height(12.dp))
 
-            CloudButtonTwo("Back") { navController.popBackStack() }
+            CloudButtonTwo("Back") { navController.popBackStack(); audio.play(R.raw.sfx_button_click) }
         }
     }
 

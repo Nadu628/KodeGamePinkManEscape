@@ -39,10 +39,12 @@ import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
@@ -55,6 +57,10 @@ fun ParentRegistrationScreen(
     viewModel: AuthViewModel = viewModel()
     ){
     val context = LocalContext.current
+    val audio = remember { AudioManager(context) }
+    LaunchedEffect(Unit) {
+        audio.loadSfx(R.raw.sfx_button_click)
+    }
 
     //formater convert MM/DD/YYYY -> yyyy-mm-dd
     val inputFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
@@ -79,7 +85,7 @@ fun ParentRegistrationScreen(
 
         val initDate = try {
             if (!initialText.isNullOrBlank()) {
-                val parsed = LocalDate.parse(initialText, inputFormatter) // ⭐ FIX
+                val parsed = LocalDate.parse(initialText, inputFormatter)
                 Calendar.getInstance().apply {
                     set(parsed.year, parsed.monthValue - 1, parsed.dayOfMonth)
                 }
@@ -92,7 +98,7 @@ fun ParentRegistrationScreen(
             context,
             { _, year, month, dayOfMonth ->
                 val picked = LocalDate.of(year, month + 1, dayOfMonth)
-                onDateSelected(picked.format(inputFormatter)) // ⭐ FIX — correct for UI
+                onDateSelected(picked.format(inputFormatter))
             },
             initDate.get(Calendar.YEAR),
             initDate.get(Calendar.MONTH),
@@ -273,6 +279,7 @@ fun ParentRegistrationScreen(
                 errorText = parentDOBError,
                 trailingIcon = {
                     IconButton(onClick = {
+                        audio.play(R.raw.sfx_button_click)
                         showDatePicker(context, parentDOB) { picked ->
                             parentDOB = picked
                         }
@@ -328,6 +335,7 @@ fun ParentRegistrationScreen(
                 errorText = childDOBError,
                 trailingIcon = {
                     IconButton(onClick = {
+                        audio.play(R.raw.sfx_button_click)
                         showDatePicker(context, childDOB) { picked ->
                             childDOB = picked
                         }
@@ -392,6 +400,7 @@ fun ParentRegistrationScreen(
                         .fillMaxWidth()
                         .height(52.dp),
                     onClick = {
+                        audio.play(R.raw.sfx_button_click)
                         if (!validateAll()) {
                             Toast.makeText(context, "Fix errors", Toast.LENGTH_SHORT).show()
                             return@CloudButtonTwo
@@ -427,6 +436,7 @@ fun ParentRegistrationScreen(
             }
             Spacer(modifier = Modifier.height(12.dp))
             CloudButtonTwo("Back") {
+                audio.play(R.raw.sfx_button_click)
                 navController.popBackStack()
             }
 

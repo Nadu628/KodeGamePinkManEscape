@@ -1,50 +1,164 @@
 package com.individual_project3.kodegame.ui.screens
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalGraphicsContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.individual_project3.kodegame.data.progress.ChildProgressEntity
-import com.individual_project3.kodegame.ui.theme.bubbleFont
-import kotlinx.coroutines.launch
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import com.individual_project3.kodegame.data.db.AppDatabase
+import com.individual_project3.kodegame.R
+import com.individual_project3.kodegame.data.progress.LevelProgressCard
+import com.individual_project3.kodegame.ui.viewModel.ParentDashboardViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.individual_project3.kodegame.KodeGameApp
+import com.individual_project3.kodegame.assets.audio.AudioManager
+import com.individual_project3.kodegame.data.progress.ChildProgressCard
+import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
+
 
 @Composable
-fun ParentDashboardScreen() {
+fun ParentDashboardScreen(
+    parentId: Int,
+    navController: NavController
+) {
+    val context = LocalContext.current
 
-    val scope = rememberCoroutineScope()
-    var progress by remember { mutableStateOf<ChildProgressEntity?>(null) }
-
+    val audio = KodeGameApp.audio
     LaunchedEffect(Unit) {
-        scope.launch {
-            progress = App.db.progressDao().getChildProgress("child1")
-        }
+        audio.loadSfx(R.raw.sfx_button_click)
     }
 
-    Column(
-        Modifier
+    val bubbleFont = FontFamily(Font(R.font.poppins_bold))
+
+    // -------- VIEWMODEL SETUP --------
+    val viewModel: ParentDashboardViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                val db = AppDatabase.getInstance(context)
+                val dao = db.progressDao()
+                @Suppress("UNCHECKED_CAST")
+                return ParentDashboardViewModel(dao) as T
+            }
+        }
+    )
+
+    val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(parentId) {
+        viewModel.loadChildren(parentId)
+    }
+
+    val gradient = Brush.verticalGradient(
+        colors = listOf(
+            Color(0xffb3e5fc),
+            Color(0xffb2ff59)
+        )
+    )
+
+    Box(
+        modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(gradient)
     ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
 
-        Text("Child Progress", fontFamily = bubbleFont, fontSize = 28.sp)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
 
-        Spacer(Modifier.height(20.dp))
+                Text(
+                    "Parent Dashboard",
+                    fontSize = 32.sp,
+                    fontFamily = bubbleFont,
+                    color = Color.White
+                )
 
-        progress?.let { p ->
-            Text("Total Strawberries: ${p.totalStrawberries}", fontSize = 20.sp, fontFamily = bubbleFont)
-            Text("Levels Completed: ${p.levelsCompleted}", fontSize = 20.sp, fontFamily = bubbleFont)
-        } ?: Text("No progress yet.", fontSize = 18.sp, fontFamily = bubbleFont)
+                CloudButtonTwo(
+                    text = "Logout",
+                    modifier = Modifier.height(50.dp)
+                ) {
+                    audio.play(R.raw.sfx_button_click)
+                    navController.navigate("pick_user_screen") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            }
+
+            CloudButtonTwo(
+                text = "➕ Add Child",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+            ) {
+                audio.play(R.raw.sfx_button_click)
+                navController.navigate("parent_registration_screen")
+            }
+
+            Spacer(Modifier.height(20.dp))
+
+            when {
+                uiState.loading -> Text(
+                    "Loading children...",
+                    fontFamily = bubbleFont,
+                    color = Color.White
+                )
+
+                uiState.children.isEmpty() -> Text(
+                    "No children found.",
+                    fontFamily = bubbleFont,
+                    color = Color.White
+                )
+
+                else -> {
+                    uiState.children.forEach { child ->
+
+                        // Child Card (tappable)
+                        ChildProgressCard(
+                            child = child,
+                            onClick = {
+                                audio.play(R.raw.sfx_button_click)
+                                navController.navigate("child_progress/${child.childId}")
+                            }
+                        )
+
+                        Spacer(Modifier.height(12.dp))
+                    }
+                }
+            }
+        }
     }
 }

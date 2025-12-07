@@ -33,13 +33,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.R
+import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.splash.JumpSequence
 import com.individual_project3.kodegame.ui.splash.RunningCharacter
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
@@ -57,6 +60,15 @@ fun UserTypeScreen(
     val gradient = Brush.verticalGradient(
         colors = listOf(Color(0xffb3e5fc), Color(0xffb2ff59))
     )
+    val context = LocalContext.current
+    val audio = KodeGameApp.audio
+
+
+    // Load SFX only once for this screen
+    LaunchedEffect(Unit) {
+        audio.loadSfx(R.raw.sfx_button_click)
+    }
+
 
     var userPicked by remember { mutableStateOf(false) }
     var showButtons by remember { mutableStateOf(false) }
@@ -120,7 +132,11 @@ fun UserTypeScreen(
             JumpSequence(
                 isVisible = true,
                 spikeYdp = -340.dp,
-                onSpikeNearCenter = { isJumping = true }
+                onSpikeNearCenter = {
+                    audio.play(R.raw.sfx_jump)
+                    isJumping = true
+
+                }
             )
         }
 
@@ -160,6 +176,7 @@ fun UserTypeScreen(
                     visible = showButtons
                 ) {
                     CloudButtonTwo("I am a Child") {
+                        audio.play(R.raw.sfx_button_click)
                         userPicked = true
                         fadeOut = true
 
@@ -179,6 +196,7 @@ fun UserTypeScreen(
                     visible = showButtons
                 ) {
                     CloudButtonTwo("I am a Parent") {
+                        audio.play(R.raw.sfx_button_click)
                         userPicked = true
                         fadeOut = true
 

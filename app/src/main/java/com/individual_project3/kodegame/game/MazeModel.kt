@@ -118,6 +118,9 @@ class MazeModel(
 ) {
     private var lastLevelGenerated: Int = 0
 
+    val currentLevelIndex: Int
+        get() = lastLevelGenerated
+
     fun nextLevel(mode: DifficultyMode): MazeLevel {
         val level = lastLevelGenerated + 1
         val seed = computeSeedForLevel(level, mode)

@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.individual_project3.kodegame.R
 import androidx.compose.material3.Text
 

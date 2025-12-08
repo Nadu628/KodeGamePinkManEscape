@@ -2,10 +2,7 @@ package com.individual_project3.kodegame.data.progress
 
 import androidx.room.Dao
 import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
-import com.individual_project3.kodegame.data.progress.ChildWithProgress
 
 @Dao
 interface ProgressDao {

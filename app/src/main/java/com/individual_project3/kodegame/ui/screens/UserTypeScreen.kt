@@ -1,15 +1,11 @@
 package com.individual_project3.kodegame.ui.screens
 
-import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,10 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -48,11 +42,9 @@ import androidx.navigation.NavController
 import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.R
-import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.splash.JumpSequence
 import com.individual_project3.kodegame.ui.splash.LanguagePickerDialog
 import com.individual_project3.kodegame.ui.splash.RunningCharacter
-import com.individual_project3.kodegame.ui.splash.findActivity
 import com.individual_project3.kodegame.ui.splash.updateAppLocale
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import kotlinx.coroutines.delay
@@ -63,7 +55,7 @@ fun UserTypeScreen(
     navController: NavController,
     character: @Composable () -> Unit
 ) {
-    val context = LocalContext.current
+
     val bubbleFont = FontFamily(Font(R.font.poppins_regular))
     val audio = KodeGameApp.audio
     val gradient = Brush.verticalGradient(
@@ -137,7 +129,7 @@ fun UserTypeScreen(
         if (!userPicked) {
             JumpSequence(
                 isVisible = true,
-                spikeYdp = -340.dp,
+                spikeYdp = (-340).dp,
                 onSpikeNearCenter = { audio.play(R.raw.sfx_jump); isJumping = true }
             )
         }

@@ -2,10 +2,7 @@ package com.individual_project3.kodegame
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
-import android.os.Build
 import android.os.Bundle
-import android.text.TextUtils
-import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.StringRes
@@ -13,14 +10,8 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.core.os.LocaleListCompat
-
 import com.individual_project3.kodegame.ui.Navigation
-import com.individual_project3.kodegame.ui.screens.DifficultyScreen
-import com.individual_project3.kodegame.ui.screens.GameScreen
-import com.individual_project3.kodegame.ui.theme.KodeGameTheme
 import java.util.Locale
 
 class MainActivity : ComponentActivity() {

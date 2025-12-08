@@ -3,7 +3,6 @@ package com.individual_project3.kodegame.assets.sprites
 import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.annotation.DrawableRes
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.CoroutineScope

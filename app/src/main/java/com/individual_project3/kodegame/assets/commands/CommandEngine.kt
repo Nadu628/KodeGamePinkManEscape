@@ -31,10 +31,6 @@ sealed class ExecEvent {
     data class Finished(val final: PlayerState) : ExecEvent()
 }
 
-// ---------------------------
-// Command execution engine
-// ---------------------------
-
 // CommandEngine.kt
 class CommandEngine(
     private val maze: Maze,
@@ -154,9 +150,7 @@ class CommandEngine(
         }
     }
 
-    // ---------------------------
     // Single step of movement
-    // ---------------------------
     private suspend fun stepMove(
         state: PlayerState,
         dx: Int,

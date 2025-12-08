@@ -28,17 +28,13 @@ import com.individual_project3.kodegame.data.model.Parent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.input.KeyboardType
 import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.R
-import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
-import java.time.format.DateTimeParseException
-import java.util.Locale
 
 
 fun showDatePicker(

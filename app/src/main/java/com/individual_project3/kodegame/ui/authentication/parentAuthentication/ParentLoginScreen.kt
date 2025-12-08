@@ -44,7 +44,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.res.stringResource
 import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo

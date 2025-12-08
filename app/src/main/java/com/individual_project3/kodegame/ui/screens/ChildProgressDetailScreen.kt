@@ -1,10 +1,8 @@
 package com.individual_project3.kodegame.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,14 +16,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -46,9 +41,8 @@ import com.github.mikephil.charting.data.LineDataSet
 import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.R
-import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.data.db.AppDatabase
-import com.individual_project3.kodegame.data.progress.ProgressRecord   // <- adjust package if needed
+import com.individual_project3.kodegame.data.progress.ProgressRecord
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.viewModel.ChildProgressViewModel
 

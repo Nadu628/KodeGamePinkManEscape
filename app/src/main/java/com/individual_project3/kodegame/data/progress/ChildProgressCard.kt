@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,7 +17,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.individual_project3.kodegame.R
-import com.individual_project3.kodegame.ui.theme.bubbleFont
+
 @Composable
 fun ChildProgressCard(
     child: ChildWithProgress,
@@ -56,26 +54,6 @@ fun ChildProgressCard(
                 fontFamily = bubbleRegular,
                 color = Color.Black
             )
-        }
-    }
-}
-
-@Composable
-fun LevelProgressCard(rec: ProgressRecord) {
-    val bubble = FontFamily(Font(R.font.poppins_regular))
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White.copy(alpha = 0.9f), RoundedCornerShape(12.dp))
-            .padding(12.dp)
-    ) {
-        Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-
-            Text("Level: ${rec.level}", fontSize = 18.sp, fontFamily = bubble)
-            Text("Strawberries: ${rec.strawberries}", fontSize = 16.sp, fontFamily = bubble)
-            Text("Completed: ${if (rec.completed) "Yes" else "No"}",
-                fontSize = 16.sp, fontFamily = bubble)
         }
     }
 }

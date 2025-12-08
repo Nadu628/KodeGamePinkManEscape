@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.KodeGameApp
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 
@@ -46,9 +47,9 @@ fun GameInstructionsScreen(
     }
 
     val instructions = when (difficulty) {
-        "easy" -> stringResource(R.string.easy_instructions).trimIndent()
+        "easy" -> LocalizedString(R.string.easy_instructions).trimIndent()
 
-        else -> stringResource(R.string.hard_instructions).trimIndent()
+        else -> LocalizedString(R.string.hard_instructions).trimIndent()
     }
 
 
@@ -67,7 +68,7 @@ fun GameInstructionsScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                stringResource(R.string.how_to_play),
+                LocalizedString(R.string.how_to_play),
                 fontSize = 28.sp,
                 fontFamily = bubbleFont,
                 textAlign = TextAlign.Center,
@@ -85,7 +86,7 @@ fun GameInstructionsScreen(
             )
 
             CloudButtonTwo(
-                stringResource(R.string.start_game),
+                LocalizedString(R.string.start_game),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(70.dp)
@@ -97,7 +98,7 @@ fun GameInstructionsScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             CloudButtonTwo(
-                text = stringResource(R.string.back),
+                text = LocalizedString(R.string.back),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)

@@ -1,17 +1,17 @@
 package com.individual_project3.kodegame.ui.splash
 
 
+import android.app.Activity
 import android.content.Context
-import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
+import android.content.ContextWrapper
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,16 +25,16 @@ import kotlinx.coroutines.delay
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.core.os.LocaleListCompat
 import com.individual_project3.kodegame.R
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.assets.audio.AudioManager
-import com.individual_project3.kodegame.ui.theme.bubbleFont
 import kotlinx.coroutines.launch
 import java.util.Locale
-import androidx.compose.ui.res.stringResource
+import com.individual_project3.kodegame.LocalizedString
+import com.individual_project3.kodegame.appLocaleState
 
 
 @Composable
@@ -104,54 +104,54 @@ fun SplashScreen(navController: NavController) {
 
             when {
                 showWelcome -> Text(
-                    stringResource(R.string.welcome),
+                    LocalizedString(R.string.welcome),
                     fontSize = 26.sp,
                     fontFamily = bubbleFont,
                     color = Color.White,
                     textAlign = TextAlign.Center
                 )
                 showPrompt -> Text(
-                    stringResource(R.string.touch_screen),
+                    LocalizedString(R.string.touch_screen),
                     fontSize = 24.sp,
                     fontFamily = bubbleFont,
                     color = Color.White
                 )
             }
         }
+
         if (showLanguageDialog) {
             LanguagePickerDialog(
                 onDismiss = { showLanguageDialog = false },
                 onLanguageSelected = { locale ->
-                    updateAppLocale(locale)
+                    updateAppLocale(locale)  // no activity required
                     showLanguageDialog = false
                 }
+
             )
+        }
+
+
+
+        if (showPrompt) {
+            IconButton(
+                onClick = {
+                    showLanguageDialog = true
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 40.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_language),
+                    contentDescription = "Language",
+                    tint = Color.Black,
+                    modifier = Modifier.size(42.dp)
+                )
+            }
         }
 
     }
 }
-
-
-@Composable
-fun LanguagePickerButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .background(Color.White.copy(alpha = 0.85f), RoundedCornerShape(16.dp))
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 8.dp)
-    ) {
-        Text(
-            stringResource(R.string.language),
-            color = Color.Black,
-            fontSize = 16.sp,
-            fontFamily = bubbleFont
-        )
-    }
-}
-
 
 @Composable
 fun LanguagePickerDialog(
@@ -168,7 +168,7 @@ fun LanguagePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.choose_language)) },
+        title = { Text(LocalizedString(R.string.choose_language)) },
 
         text = {
             Column {
@@ -191,10 +191,23 @@ fun LanguagePickerDialog(
 
 
 fun updateAppLocale(locale: Locale) {
-    AppCompatDelegate.setApplicationLocales(
-        LocaleListCompat.create(locale)
-    )
+    appLocaleState.value = locale
 }
+
+
+
+fun Context.findActivity(): Activity? {
+    var ctx = this
+    while (ctx is ContextWrapper) {
+        if (ctx is Activity) return ctx
+        ctx = ctx.baseContext
+    }
+    return null
+}
+
+
+
+
 
 
 

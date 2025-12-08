@@ -44,6 +44,8 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.stringResource
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 
@@ -73,9 +75,9 @@ fun ParentLoginScreen(
 
     fun validateALl(): Boolean{
         var ok = true
-        if (email.isBlank()) { emailError = "Enter email"; ok = false }
-        if (!Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) { emailError = "Invalid email"; ok = false }
-        if (password.isBlank()) { passwordError = "Enter password"; ok = false }
+        if (email.isBlank()) { emailError = context.getString(R.string.enter_email); ok = false }
+        if (!Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()) { emailError = context.getString(R.string.invalid_email); ok = false }
+        if (password.isBlank()) { passwordError = context.getString(R.string.enter_password); ok = false }
         return ok
     }
 
@@ -92,7 +94,7 @@ fun ParentLoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Parent Login",
+                text = LocalizedString(R.string.parent_login),
                 fontSize = 26.sp,
                 fontFamily = bubbleFont,
                 color = Color.White,
@@ -105,7 +107,7 @@ fun ParentLoginScreen(
             CloudTextField(
                 value = email,
                 onValueChange = {email = it.trim(); emailError = null},
-                labelText = "Email",
+                labelText = LocalizedString(R.string.email),
                 isError = emailError != null,
                 errorText = emailError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -118,7 +120,7 @@ fun ParentLoginScreen(
             CloudTextField(
                 value = password,
                 onValueChange = {password = it.trim(); passwordError = null},
-                labelText = "Password",
+                labelText = LocalizedString(R.string.password),
                 isError = passwordError != null,
                 errorText = passwordError,
                 singleLine = true,
@@ -145,12 +147,12 @@ fun ParentLoginScreen(
                 enter = slideInHorizontally(initialOffsetX =  {it  }),
                 exit = fadeOut()
             ) {
-                CloudButtonTwo("Login") {
+                CloudButtonTwo(LocalizedString(R.string.login)) {
                     viewModel.loginParent(email, password){id ->
                         if(id != null){
                             navController.navigate("parent_dashboard/$id")
                         }else{
-                            Toast.makeText(context, "Invalid Credentials", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.invalid_credentials), Toast.LENGTH_SHORT).show()
                         }
                     }
                 }
@@ -158,18 +160,15 @@ fun ParentLoginScreen(
 
 
             Spacer(modifier = Modifier.height(16.dp))
-            CloudButtonTwo("Register") {
+            CloudButtonTwo(LocalizedString(R.string.register)) {
                 audio.play(R.raw.sfx_button_click)
                 navController.navigate("parent_registration_screen")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
-            CloudButtonTwo("Back") {
+            CloudButtonTwo(LocalizedString(R.string.back)) {
                 navController.navigate("pick_user_screen")
             }
         }
     }
-
-
-
 }

@@ -37,7 +37,7 @@
     <string name="child_first_name">子どもの名</string>
     <string name="child_last_name">子どもの姓</string>
     <string name="enter_child_first_name">子どもの名を入力</string>
-    <string name="enter_child_last_first_name">子どもの姓を入力</string>
+    <string name="enter_child_last_name">子どもの姓を入力</string>
     <string name="dob_child_blank">子どもの生年月日を入力</string>
     <string name="enter_first_name">名を入力</string>
     <string name="is_valid_name">3〜30文字で入力してください</string>
@@ -47,7 +47,6 @@
     <string name="child_dob">子どもの生年月日 (MM/DD/YYYY)</string>
     <string name="dob_blank">生年月日を入力してください</string>
     <string name="dob_db">MM/DD/YYYY の形式で入力してください</string>
-    <string name="select_parent">保護者を選択</string>
     <string name="username_blank">ユーザー名を入力</string>
     <string name="password_blank">パスワードを入力</string>
     <string name="username_hint">3〜30文字の英数字</string>
@@ -55,6 +54,11 @@
     <string name="registration_success">登録完了！</string>
     <string name="register">登録</string>
     <string name="fix_errors">エラーを修正してください</string>
+    <string name="registered">登録完了！</string>
+    <string name="parent_label">保護者: %1$s %2$s</string>
+    <string name="select_parent">保護者を選択</string>
+
+
 
     <!-- Difficulty -->
     <string name="choose_difficulty">難易度を選択</string>

@@ -1,39 +1,81 @@
 package com.individual_project3.kodegame
 
+import android.annotation.SuppressLint
+import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import android.text.TextUtils
+import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.individual_project3.kodegame.assets.audio.AudioManager
-import com.individual_project3.kodegame.assets.commands.Maze
-import com.individual_project3.kodegame.assets.commands.PlayerState
-import com.individual_project3.kodegame.assets.commands.Pos
-import com.individual_project3.kodegame.game.DifficultyMode
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.core.os.LocaleListCompat
+
 import com.individual_project3.kodegame.ui.Navigation
 import com.individual_project3.kodegame.ui.screens.DifficultyScreen
 import com.individual_project3.kodegame.ui.screens.GameScreen
 import com.individual_project3.kodegame.ui.theme.KodeGameTheme
-
-
+import java.util.Locale
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // APPLY SAVED LOCALE BEFORE COMPOSE STARTS
+        val appLocales = AppCompatDelegate.getApplicationLocales()
+        if (appLocales.isEmpty) {
+            // Optional: default language fallback
+            AppCompatDelegate.setApplicationLocales(
+                LocaleListCompat.create(Locale("en"))
+            )
+        }
+
         setContent {
-            Navigation()
+            AppWithLocaleSupport()
         }
+
         KodeGameApp.audio.startBackground(R.raw.sfx_game_music)
-
-    }
-
-    @Composable
-    fun GameApp(){
-        MaterialTheme {
-            //GameScreen()
-        }
     }
 }
+
+
+
+@Composable
+fun AppWithLocaleSupport() {
+    CompositionLocalProvider(LocalAppLocale provides appLocaleState.value) {
+        Navigation()
+    }
+}
+
+@SuppressLint("LocalContextConfigurationRead")
+@Suppress("DEPRECATION")
+@Composable
+fun LocalizedString(
+    @StringRes id: Int,
+    vararg formatArgs: Any
+): String {
+    val context = LocalContext.current
+    val locale = LocalAppLocale.current
+
+    val config = Configuration(context.resources.configuration)
+    config.setLocale(locale)
+
+    val localizedContext = context.createConfigurationContext(config)
+
+    return if (formatArgs.isNotEmpty())
+        localizedContext.getString(id, *formatArgs)
+    else
+        localizedContext.getString(id)
+}
+
+
+
+
+
+

@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
@@ -182,7 +183,7 @@ fun ParentRegistrationScreen(
         if(childFNError != null) ok = false
 
         childLNError = when{
-            childLN.isBlank() -> context.getString(R.string.enter_child_last_first_name)
+            childLN.isBlank() -> context.getString(R.string.enter_child_last_name)
             !isValidName(childLN) -> context.getString(R.string.is_valid_name)
             else -> null
         }
@@ -231,7 +232,7 @@ fun ParentRegistrationScreen(
         ){
             //Screen title
             Text(
-                stringResource(R.string.parent_registration),
+                LocalizedString(R.string.parent_registration),
                 fontSize = 20.sp,
                 fontFamily = bubbleFont,
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -246,7 +247,7 @@ fun ParentRegistrationScreen(
                     parentFN = it
                     parentFNError = null
                 },
-                stringResource(R.string.first_name),
+                LocalizedString(R.string.first_name),
                 isError = parentFNError != null,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -260,7 +261,7 @@ fun ParentRegistrationScreen(
                     parentLN = it
                     parentLNError = null
                 },
-                stringResource(R.string.last_name),
+                LocalizedString(R.string.last_name),
                 isError = parentLNError != null,
                 errorText = parentLNError,
                 modifier = Modifier.fillMaxWidth()
@@ -275,7 +276,7 @@ fun ParentRegistrationScreen(
                     parentDOB = it
                     parentDOBError = null
                 },
-                stringResource(R.string.dob),
+                LocalizedString(R.string.dob),
                 isError = parentDOBError != null,
                 errorText = parentDOBError,
                 trailingIcon = {
@@ -302,7 +303,7 @@ fun ParentRegistrationScreen(
                     childFN = it
                     childFNError = null
                 },
-                stringResource(R.string.child_first_name),
+                LocalizedString(R.string.child_first_name),
                 isError = childFNError != null,
                 errorText = childFNError,
                 modifier = Modifier.fillMaxWidth()
@@ -316,7 +317,7 @@ fun ParentRegistrationScreen(
                     childLN = it
                     childLNError = null
                 },
-                stringResource(R.string.child_last_name),
+                LocalizedString(R.string.child_last_name),
                 isError = childLNError != null,
                 errorText = childLNError,
                 modifier = Modifier.fillMaxWidth()
@@ -331,7 +332,7 @@ fun ParentRegistrationScreen(
                     childDOB = it
                     childDOBError = null
                 },
-                stringResource(R.string.child_dob),
+                LocalizedString(R.string.child_dob),
                 isError = childDOBError != null,
                 errorText = childDOBError,
                 trailingIcon = {
@@ -358,7 +359,7 @@ fun ParentRegistrationScreen(
                     email = it
                     emailError = null
                 },
-                stringResource(R.string.email),
+                LocalizedString(R.string.email),
                 isError = emailError != null,
                 errorText = emailError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -374,7 +375,7 @@ fun ParentRegistrationScreen(
                     password = it
                     passwordError = null
                 },
-                stringResource(R.string.password),
+                LocalizedString(R.string.password),
                 isError = passwordError != null,
                 errorText = passwordError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -396,14 +397,14 @@ fun ParentRegistrationScreen(
                 exit = fadeOut()
             ) {
                 CloudButtonTwo(
-                    text = "Register",
+                    text = LocalizedString(R.string.register),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
                         if (!validateAll()) {
-                            Toast.makeText(context, "Fix errors", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.fix_errors), Toast.LENGTH_SHORT).show()
                             return@CloudButtonTwo
                         }
 
@@ -422,12 +423,12 @@ fun ParentRegistrationScreen(
                             childDobDb
                         ) { id ->
                             if (id != null) {
-                                Toast.makeText(context, "Registered!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.registered), Toast.LENGTH_SHORT).show()
                                 navController.navigate("pick_user_screen") {
                                     popUpTo("splash_screen") { inclusive = true }
                                 }
                             }else{
-                                Toast.makeText(context, "Fix errors", Toast.LENGTH_SHORT ).show()
+                                Toast.makeText(context,context.getString(R.string.fix_errors) , Toast.LENGTH_SHORT ).show()
                             }
                         }
 
@@ -436,7 +437,7 @@ fun ParentRegistrationScreen(
 
             }
             Spacer(modifier = Modifier.height(12.dp))
-            CloudButtonTwo("Back") {
+            CloudButtonTwo(LocalizedString(R.string.back)) {
                 audio.play(R.raw.sfx_button_click)
                 navController.popBackStack()
             }

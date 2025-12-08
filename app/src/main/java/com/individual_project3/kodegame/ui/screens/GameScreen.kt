@@ -1,5 +1,6 @@
 package com.individual_project3.kodegame.ui.screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -40,6 +41,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import com.individual_project3.kodegame.KodeGameApp
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.assets.commands.NestedProgramParser
 import com.individual_project3.kodegame.assets.commands.UiCommand
 import com.individual_project3.kodegame.game.MazeRendererWithSprites
@@ -47,6 +49,7 @@ import com.individual_project3.kodegame.ui.viewModel.buildStructuredProgram
 import kotlinx.coroutines.launch
 
 
+@SuppressLint("StringFormatInvalid")
 @Composable
 fun GameScreen(
     difficulty: DifficultyMode,
@@ -144,7 +147,7 @@ fun GameScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CloudButtonTwo(
-                    text = stringResource(R.string.back),
+                    text = LocalizedString(R.string.back),
                     modifier = Modifier.width(100.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
@@ -153,7 +156,7 @@ fun GameScreen(
                 )
 
                 Text(
-                    text = stringResource(R.string.mode, difficulty.name)
+                    text = context.getString(R.string.mode, difficulty.name)
                     ,
                     fontFamily = bubbleFont,
                     fontSize = 18.sp,
@@ -161,7 +164,7 @@ fun GameScreen(
                 )
 
                 CloudButtonTwo(
-                    text = stringResource(R.string.exit),
+                    text = LocalizedString(R.string.exit),
                     modifier = Modifier.width(100.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
@@ -182,7 +185,7 @@ fun GameScreen(
             ) {
                 if (vm.levelCompleted.value) {
                     CloudButtonTwo(
-                        text = stringResource(R.string.next),
+                        text = LocalizedString(R.string.next),
                         modifier = Modifier.width(100.dp),
                         onClick = {
                             audio.play(R.raw.sfx_button_click)
@@ -197,7 +200,7 @@ fun GameScreen(
                 Spacer(Modifier.width(10.dp))
 
                 CloudButtonTwo(
-                    text = stringResource(R.string.reset),
+                    text = LocalizedString(R.string.reset),
                     modifier = Modifier.width(100.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
@@ -210,7 +213,7 @@ fun GameScreen(
                 Spacer(Modifier.width(10.dp))
 
                 CloudButtonTwo(
-                    text = stringResource(R.string.play),
+                    text = LocalizedString(R.string.play),
                     modifier = Modifier.width(100.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
@@ -249,7 +252,7 @@ fun GameScreen(
 
             if (maze == null) {
                 Text(
-                    stringResource(R.string.loading),
+                    LocalizedString(R.string.loading),
                     color = Color.White,
                     fontFamily = bubbleFont,
                     fontSize = 20.sp
@@ -344,17 +347,17 @@ fun CommandPaletteBar(
 
         // EASY + HARD
         if (difficulty == DifficultyMode.EASY || difficulty == DifficultyMode.HARD) {
-            add(stringResource(R.string.repeat_three) to UiCommand.Repeat(3))
-            add(stringResource(R.string.if_) to UiCommand.IfHasStrawberry())
+            add(LocalizedString(R.string.repeat_three) to UiCommand.Repeat(3))
+            add(LocalizedString(R.string.if_) to UiCommand.IfHasStrawberry())
         }
 
         // HARD only
         if (difficulty == DifficultyMode.HARD) {
-            add(stringResource(R.string.until) to UiCommand.RepeatUntilGoal())
-            add(stringResource(R.string.while_) to UiCommand.RepeatWhileHasStrawberry())
-            add(stringResource(R.string.func_start) to UiCommand.FunctionStart)
-            add(stringResource(R.string.func_end) to UiCommand.EndFunction)
-            add(stringResource(R.string.call_func) to UiCommand.FunctionCall)
+            add(LocalizedString(R.string.until) to UiCommand.RepeatUntilGoal())
+            add(LocalizedString(R.string.while_) to UiCommand.RepeatWhileHasStrawberry())
+            add(LocalizedString(R.string.func_start) to UiCommand.FunctionStart)
+            add(LocalizedString(R.string.func_end) to UiCommand.EndFunction)
+            add(LocalizedString(R.string.call_func) to UiCommand.FunctionCall)
         }
     }
 
@@ -462,7 +465,7 @@ fun ProgramTrackBar(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    stringResource(R.string.drag_commands),
+                    LocalizedString(R.string.drag_commands),
                     fontSize = 14.sp,
                     color = Color.Black.copy(alpha = 0.7f)
                 )
@@ -484,18 +487,18 @@ fun ProgramTrackBar(
                         UiCommand.MoveLeft -> "←"
                         UiCommand.MoveRight -> "→"
 
-                        is UiCommand.Repeat -> stringResource(R.string.repeat_times, cmd.times)
+                        is UiCommand.Repeat -> LocalizedString(R.string.repeat_times, cmd.times)
 
-                        is UiCommand.IfHasStrawberry -> stringResource(R.string.if_)
+                        is UiCommand.IfHasStrawberry -> LocalizedString(R.string.if_)
 
-                        UiCommand.FunctionStart -> stringResource(R.string.func_start)
-                        UiCommand.EndFunction -> stringResource(R.string.func_end)
-                        UiCommand.FunctionCall -> stringResource(R.string.call_func)
+                        UiCommand.FunctionStart -> LocalizedString(R.string.func_start)
+                        UiCommand.EndFunction -> LocalizedString(R.string.func_end)
+                        UiCommand.FunctionCall -> LocalizedString(R.string.call_func)
 
-                        is UiCommand.RepeatUntilGoal -> stringResource(R.string.until)
-                        is UiCommand.RepeatWhileHasStrawberry -> context.getString(R.string.while_a_strawberry)
+                        is UiCommand.RepeatUntilGoal -> LocalizedString(R.string.until)
+                        is UiCommand.RepeatWhileHasStrawberry -> LocalizedString(R.string.while_a_strawberry)
 
-                        is UiCommand.FunctionDefinition -> stringResource(R.string.func_body)
+                        is UiCommand.FunctionDefinition -> LocalizedString(R.string.func_body)
                     }
 
                     DraggableTrackBlock(label) {

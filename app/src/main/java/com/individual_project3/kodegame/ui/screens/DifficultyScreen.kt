@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.KodeGameApp
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 
@@ -48,7 +49,7 @@ fun DifficultyScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                stringResource(R.string.choose_difficulty),
+                LocalizedString(R.string.choose_difficulty),
                 fontSize = 26.sp,
                 fontFamily = bubbleFont,
                 color = Color.White,
@@ -56,7 +57,7 @@ fun DifficultyScreen(navController: NavController) {
             )
 
             CloudButtonTwo(
-                text = stringResource(R.string.easy_mode),
+                text = LocalizedString(R.string.easy_mode),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
@@ -67,7 +68,7 @@ fun DifficultyScreen(navController: NavController) {
             }
 
             CloudButtonTwo(
-                stringResource(R.string.hard_mode),
+                LocalizedString(R.string.hard_mode),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(80.dp)
@@ -80,7 +81,7 @@ fun DifficultyScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(30.dp))
 
             CloudButtonTwo(
-                stringResource(R.string.back),
+                LocalizedString(R.string.back),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
@@ -92,7 +93,7 @@ fun DifficultyScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(30.dp))
 
             CloudButtonTwo(
-                stringResource(R.string.logout),
+                LocalizedString(R.string.logout),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)

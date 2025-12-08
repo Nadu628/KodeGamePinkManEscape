@@ -30,6 +30,7 @@ import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.ui.viewModel.ParentDashboardViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.individual_project3.kodegame.KodeGameApp
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.data.progress.ChildProgressCard
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 
@@ -86,13 +87,13 @@ fun ParentDashboardScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             Text(
-                stringResource(R.string.parent_dashboard), fontSize = 32.sp, fontFamily = bubbleFont, color = Color.White
+                LocalizedString(R.string.parent_dashboard), fontSize = 32.sp, fontFamily = bubbleFont, color = Color.White
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             CloudButtonTwo(
-                text = stringResource(R.string.add_child), modifier = Modifier
+                text = LocalizedString(R.string.add_child), modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
             ) {
@@ -104,11 +105,11 @@ fun ParentDashboardScreen(
 
             when {
                 uiState.loading -> Text(
-                    stringResource(R.string.loading), fontFamily = bubbleFont, color = Color.White
+                    LocalizedString(R.string.loading), fontFamily = bubbleFont, color = Color.White
                 )
 
                 uiState.children.isEmpty() -> Text(
-                    stringResource(R.string.no_children_found), fontFamily = bubbleFont, color = Color.White
+                    LocalizedString(R.string.no_children_found), fontFamily = bubbleFont, color = Color.White
                 )
 
                 else -> {
@@ -129,7 +130,7 @@ fun ParentDashboardScreen(
             Spacer(Modifier.height(20.dp))
 
             CloudButtonTwo(
-                text = stringResource(R.string.logout), modifier = Modifier
+                text = LocalizedString(R.string.logout), modifier = Modifier
                     .height(50.dp)
                     .fillMaxWidth()
             ) {

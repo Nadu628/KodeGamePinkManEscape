@@ -44,7 +44,6 @@
     <string name="child_dob">Child\'s Date of Birth (MM/DD/YYYY)</string>
     <string name="dob_blank">Enter your date of birth</string>
     <string name="dob_db">Use MM/DD/YYYY</string>
-    <string name="select_parent">Select Parent</string>
     <string name="username_blank">Enter a username</string>
     <string name="password_blank">Enter a password</string>
     <string name="username_hint">Must be 3–30 letters or numbers</string>
@@ -52,6 +51,11 @@
     <string name="registration_success">Registered!</string>
     <string name="register">Register</string>
     <string name="fix_errors">Fix errors</string>
+    <string name="registered">Registered!</string>
+    <string name="parent_label">Parent: %1$s %2$s</string>
+    <string name="select_parent">Select Parent</string>
+
+
 
 
     <!-- Difficulty -->

@@ -11,23 +11,23 @@
     <string name="choose_language">Chwazi lang ou</string>
 
     <!-- User Type Screen -->
-    <string name="who_are_you">Kilès ou ye?</string>
+    <string name="who_are_you">Kiles ou ye?</string>
     <string name="i_am_child">Mwen se yon timoun</string>
     <string name="i_am_parent">Mwen se yon paran</string>
 
     <!-- Login -->
     <string name="child_login">Koneksyon Timoun</string>
     <string name="parent_login">Koneksyon Paran</string>
-    <string name="email">Imèl</string>
-    <string name="enter_email">Antre imèl la</string>
+    <string name="email">Imel</string>
+    <string name="enter_email">Antre imel la</string>
     <string name="enter_password">Antre modpas la</string>
-    <string name="enter_username">Antre non itilizatè a</string>
-    <string name="invalid_email">Imèl pa valab</string>
-    <string name="email_error">Tanpri antre yon imèl ki valab</string>
-    <string name="username">Non itilizatè</string>
+    <string name="enter_username">Antre non itilizate a</string>
+    <string name="invalid_email">Imel pa valab</string>
+    <string name="email_error">Tanpri antre yon imel ki valab</string>
+    <string name="username">Non itilizate</string>
     <string name="password">Modpas</string>
     <string name="login">Konekte</string>
-    <string name="invalid_credentials">Enfòmasyon koneksyon pa kòrèk</string>
+    <string name="invalid_credentials">Enfomasyon koneksyon pa korek</string>
     <string name="back">Retounen</string>
 
     <!-- Registration -->
@@ -37,66 +37,67 @@
     <string name="child_first_name">Non Timoun</string>
     <string name="child_last_name">Siyati Timoun</string>
     <string name="enter_child_first_name">Antre non timoun nan</string>
-    <string name="enter_child_last_first_name">Antre siyati timoun nan</string>
+    <string name="enter_child_last_name">Antre siyati timoun nan</string>
     <string name="dob_child_blank">Antre dat nesans timoun nan</string>
     <string name="enter_first_name">Antre non ou</string>
-    <string name="is_valid_name">Dwe genyen 3–30 karaktè</string>
+    <string name="is_valid_name">Dwe genyen 3-30 karakter</string>
     <string name="last_name">Siyati</string>
     <string name="enter_last_name">Antre siyati ou</string>
     <string name="dob">Dat nesans (MM/JJ/AAAA)</string>
     <string name="child_dob">Dat nesans timoun nan (MM/JJ/AAAA)</string>
     <string name="dob_blank">Tanpri antre dat nesans ou</string>
-    <string name="dob_db">Itize MM/JJ/AAAA</string>
+    <string name="dob_db">Itilize MM/JJ/AAAA</string>
     <string name="select_parent">Chwazi yon paran</string>
-    <string name="username_blank">Antre non itilizatè</string>
+    <string name="username_blank">Antre non itilizate</string>
     <string name="password_blank">Antre modpas</string>
-    <string name="username_hint">Dwe genyen 3–30 lèt oswa chif</string>
-    <string name="password_hint">Modpas dwe gen omwen 6 karaktè</string>
+    <string name="username_hint">Dwe genyen 3-30 let oswa chif</string>
+    <string name="password_hint">Modpas dwe gen omwen 6 karakter</string>
     <string name="registration_success">Enskripsyon reyisi!</string>
     <string name="register">Enskri</string>
-    <string name="fix_errors">Tanpri korije erè yo</string>
+    <string name="fix_errors">Tanpri korije ere yo</string>
+    <string name="registered">Anrejistre!</string>
+    <string name="parent_label">Paran: %1$s %2$s</string>
 
     <!-- Difficulty -->
     <string name="choose_difficulty">Chwazi yon nivo difikilte</string>
-    <string name="easy_mode">Mòd Fasil</string>
-    <string name="hard_mode">Mòd Difisil</string>
+    <string name="easy_mode">Mod Fasil</string>
+    <string name="hard_mode">Mod Difisil</string>
 
     <!-- Game screen -->
-    <string name="mode">Mòd:</string>
+    <string name="mode">Mod:</string>
     <string name="next">Pwochen</string>
-    <string name="exit">Sòti</string>
+    <string name="exit">Soti</string>
     <string name="reset">Reyajiste</string>
     <string name="play">Jwe</string>
     <string name="loading">Chaje...</string>
     <string name="if_">Si</string>
     <string name="until">Jiska</string>
     <string name="while_">Pandan</string>
-    <string name="func_start">Fonksyon [Kòmanse]</string>
+    <string name="func_start">Fonksyon [Komanse]</string>
     <string name="func_end">Fonksyon [Fini]</string>
     <string name="call_func">Rele Fonksyon</string>
-    <string name="drag_commands">Trennen blòk yo pou bati pwogram nan</string>
+    <string name="drag_commands">Trennen blok yo pou bati pwogram nan</string>
     <string name="repeat_three">Repete 3 fwa</string>
     <string name="repeat_times">Repete %1$d×</string>
     <string name="while_a_strawberry">Pandan 🍓</string>
-    <string name="func_body">Kò Fonksyon</string>
-
+    <string name="func_body">Ko Fonksyon</string>
 
     <!-- Instruction Screen -->
     <string name="how_to_play">Kijan pou jwe</string>
-    <string name="start_game">Kòmanse jwèt la</string>
+    <string name="start_game">Komanse jwèt la</string>
 
     <string name="easy_instructions">
         • Fè Piti Woz mache nan labirent nwaj la\n
-        • Trennen epi lage blòk flèch yo (Anwo, Anba, Gòch, Dwat)\n
+        • Trennen epi lage blok flech yo (Anwo, Anba, Goch, Dwat)\n
         • Itilize bouk senp ak kondisyon\n
-        • Ranmase frèz yo\n
+        • Ranmase frez yo\n
         • Evite pik yo\n
-        • Rive nan pòt sòti a pou genyen!
+        • Rive nan pot soti a pou genyen!
     </string>
 
     <string name="hard_instructions">
-        • Tout sa ki nan mòd Fasil la\n
-        • ANPLIS: fonksyon, bouk anndan bouk, ak danje ki pi difisil\n
+        • Tout sa ki nan mod Fasil la\n
+        • Anplis: fonksyon, bouk anndan bouk ak danje ki pi difisil\n
         • Panse byen anvan ou kouri pwogram ou\n
         • Planifye epi teste lojik ou
     </string>
@@ -112,10 +113,10 @@
     <string name="add_child">Ajoute Timoun</string>
 
     <!-- Child Progress -->
-    <string name="child_progress">Pwogrè Timoun</string>
-    <string name="no_progress">Pa gen pwogrè ankò!</string>
-    <string name="strawberries_per_level">Frèz pa nivo</string>
-    <string name="strawberries_per_level_bar">Frèz pa nivo (Bar)</string>
+    <string name="child_progress">Pwogre Timoun</string>
+    <string name="no_progress">Pa gen pwogre anko!</string>
+    <string name="strawberries_per_level">Frez pa nivo</string>
+    <string name="strawberries_per_level_bar">Frez pa nivo (Bar)</string>
     <string name="back_to_dashboard">Retounen nan tablo paran</string>
 
 </resources>

@@ -1,37 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">L'Évasion de Pink Man</string>
+    <string name="app_name">L\'Évasion de Pink Man</string>
 
-    <string name="welcome">Bienvenue dans L'Évasion de Pink Man</string>
-    <string name="touch_screen">Touchez l'écran</string>
+    <!-- Splash -->
+    <string name="welcome">Bienvenue dans L\'Évasion de Pink Man</string>
+    <string name="touch_screen">Touchez l\'écran</string>
     <string name="language">Langue</string>
     <string name="choose_language">Choisir la langue</string>
 
+    <!-- User Type -->
     <string name="who_are_you">Qui êtes-vous ?</string>
     <string name="i_am_child">Je suis un enfant</string>
     <string name="i_am_parent">Je suis un parent</string>
 
+    <!-- Login -->
     <string name="child_login">Connexion Enfant</string>
     <string name="parent_login">Connexion Parent</string>
     <string name="email">Email</string>
-    <string name="enter_email">Entrez l'email</string>
+    <string name="enter_email">Entrez l\'email</string>
     <string name="enter_password">Entrez le mot de passe</string>
-    <string name="enter_username">Entrez le nom d'utilisateur</string>
+    <string name="enter_username">Entrez le nom d\'utilisateur</string>
     <string name="invalid_email">Email invalide</string>
     <string name="email_error">Entrez une adresse email valide</string>
-    <string name="username">Nom d'utilisateur</string>
+    <string name="username">Nom d\'utilisateur</string>
     <string name="password">Mot de passe</string>
     <string name="login">Connexion</string>
     <string name="invalid_credentials">Identifiants invalides</string>
     <string name="back">Retour</string>
 
+    <!-- Registration -->
     <string name="child_registration">Inscription Enfant</string>
     <string name="parent_registration">Inscription Parent</string>
     <string name="first_name">Prénom</string>
     <string name="child_first_name">Prénom de l\'enfant</string>
     <string name="child_last_name">Nom de l\'enfant</string>
     <string name="enter_child_first_name">Entrez le prénom de l\'enfant</string>
-    <string name="enter_child_last_first_name">Entrez le nom de famille de l'enfant</string>
+    <string name="enter_child_last_name">Entrez le nom de famille de l\'enfant</string>
     <string name="dob_child_blank">Entrez la date de naissance de l\'enfant</string>
     <string name="enter_first_name">Entrez votre prénom</string>
     <string name="is_valid_name">Doit comporter 3 à 30 caractères</string>
@@ -49,11 +53,15 @@
     <string name="registration_success">Inscription réussie !</string>
     <string name="register">S\'inscrire</string>
     <string name="fix_errors">Corrigez les erreurs</string>
+    <string name="registered">Enregistré !</string>
+    <string name="parent_label">Parent : %1$s %2$s</string>
 
+    <!-- Difficulty -->
     <string name="choose_difficulty">Choisissez votre difficulté</string>
     <string name="easy_mode">Mode Facile</string>
     <string name="hard_mode">Mode Difficile</string>
 
+    <!-- Game Screen -->
     <string name="mode">Mode :</string>
     <string name="next">Suivant</string>
     <string name="exit">Quitter</string>
@@ -61,7 +69,7 @@
     <string name="play">Jouer</string>
     <string name="loading">Chargement...</string>
     <string name="if_">Si</string>
-    <string name="until">Jusqu'à</string>
+    <string name="until">Jusqu\'à</string>
     <string name="while_">Tant que</string>
     <string name="func_start">Func [Début]</string>
     <string name="func_end">Func [Fin]</string>
@@ -72,35 +80,38 @@
     <string name="while_a_strawberry">Tant que 🍓</string>
     <string name="func_body">Corps de Fonction</string>
 
-
+    <!-- Instructions -->
     <string name="how_to_play">Comment jouer</string>
     <string name="start_game">Commencer le jeu</string>
+
     <string name="easy_instructions">
-    • Déplace Pink Man dans le labyrinthe de nuages\n
-    • Fais glisser et dépose les blocs de flèches (Haut, Bas, Gauche, Droite)\n
-    • Utilise des boucles et des conditions simples\n
-    • Récupère les fraises\n
-    • Évite les piques\n
-    • Atteins l'objectif pour gagner !
-</string>
+        • Déplace Pink Man dans le labyrinthe de nuages\n
+        • Fais glisser et dépose les blocs de flèches (Haut, Bas, Gauche, Droite)\n
+        • Utilise des boucles et des conditions simples\n
+        • Récupère les fraises\n
+        • Évite les piques\n
+        • Atteins l\'objectif pour gagner !
+    </string>
 
     <string name="hard_instructions">
-    • Tout ce qu\'il y a dans le Mode Facile\n
-    • EN PLUS : fonctions, boucles imbriquées et dangers plus difficiles\n
-    • Réfléchis bien avant de lancer ton programme\n
-    • Planifie à l'avance et teste ta logique
-</string>
+        • Tout ce qu\'il y a dans le Mode Facile\n
+        • EN PLUS : fonctions, boucles imbriquées et dangers plus difficiles\n
+        • Réfléchis bien avant de lancer ton programme\n
+        • Planifie à l\'avance et teste ta logique
+    </string>
 
-
+    <!-- Game completion -->
     <string name="level_success">Niveau terminé !</string>
 
+    <!-- Parent Dashboard -->
     <string name="parent_dashboard">Tableau de bord Parent</string>
     <string name="no_children_found">Aucun enfant trouvé.</string>
     <string name="loading_children">Chargement des enfants...</string>
     <string name="logout">Déconnexion</string>
     <string name="add_child">Ajouter un enfant</string>
 
-    <string name="child_progress">Progression de l'enfant</string>
+    <!-- Child Progress -->
+    <string name="child_progress">Progression de l\'enfant</string>
     <string name="no_progress">Aucune progression.</string>
     <string name="strawberries_per_level">Fraises par niveau</string>
     <string name="strawberries_per_level_bar">Fraises par niveau (Barre)</string>

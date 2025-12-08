@@ -28,9 +28,11 @@ import com.individual_project3.kodegame.data.model.Parent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.input.KeyboardType
 import com.individual_project3.kodegame.KodeGameApp
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
@@ -151,37 +153,37 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
         var ok = true
 
         firstNameError = when {
-            firstName.isBlank() -> "Enter your first name"
-            !isValidName(firstName) -> "Must be 3-30 characters"
+            firstName.isBlank() -> context.getString(R.string.enter_first_name)
+            !isValidName(firstName) -> context.getString(R.string.is_valid_name)
             else -> null
         }.also { if (it != null) ok = false }
 
         lastNameError = when {
-            lastName.isBlank() -> "Enter your last name"
-            !isValidName(lastName) -> "Must be 3-30 characters"
+            lastName.isBlank() -> context.getString(R.string.enter_last_name)
+            !isValidName(lastName) -> context.getString(R.string.is_valid_name)
             else -> null
         }.also { if (it != null) ok = false }
 
         val dobDb = parseDobForDb(dob)
         dobError = when {
-            dob.isBlank() -> "Enter your date of birth"
-            dobDb == null -> "Use MM/DD/YYYY"
+            dob.isBlank() -> context.getString(R.string.dob_blank)
+            dobDb == null -> context.getString(R.string.dob_db)
             else -> null
         }.also { if (it != null) ok = false }
 
         usernameError = when {
-            username.isBlank() -> "Enter a username"
-            !isValidUsername(username) -> "Must be 3-30 letters or numbers"
+            username.isBlank() -> context.getString(R.string.enter_username)
+            !isValidUsername(username) -> context.getString(R.string.username_hint)
             else -> null
         }.also { if (it != null) ok = false }
 
         passwordError = when {
-            password.length < 6 -> "Password must be at least 6 characters"
+            password.length < 6 -> context.getString(R.string.password_hint)
             else -> null
         }.also { if (it != null) ok = false }
 
         parentSelectionError = when {
-            selectedParent == null -> "Select a parent"
+            selectedParent == null -> context.getString(R.string.select_parent)
             else -> null
         }.also { if (it != null) ok = false }
 
@@ -198,7 +200,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Child Registration", fontSize = 24.sp, fontFamily = bubbleFont)
+            Text(LocalizedString(R.string.child_registration), fontSize = 24.sp, fontFamily = bubbleFont)
 
             Spacer(modifier = Modifier.height(18.dp))
 
@@ -210,7 +212,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                     firstName = it
                     firstNameError = null
                 },
-                labelText = "First Name",
+                labelText = LocalizedString(R.string.first_name),
                 isError = firstNameError != null,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -224,7 +226,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                     lastName = it
                     lastNameError = null
                 },
-                labelText = "Last Name",
+                labelText = LocalizedString(R.string.last_name),
                 isError = lastNameError != null,
                 errorText = lastNameError,
                 modifier = Modifier.fillMaxWidth()
@@ -239,7 +241,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                     dob = it
                     dobError = null
                 },
-                labelText = "Date of Birth (MM/DD/YYYY)",
+                labelText = LocalizedString(R.string.dob),
                 isError = dobError != null,
                 errorText = dobError,
                 trailingIcon = {
@@ -262,8 +264,12 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
             //parent dropbox
             Box {
                 CloudButtonTwo(
-                    text = selectedParent?.let { "Parent: ${it.firstName} ${it.lastName}" }
-                        ?: "Select Parent",
+                    text = selectedParent?.let { LocalizedString(
+                        R.string.parent_label,
+                        it.firstName,
+                        it.lastName
+                    ) }
+                        ?: LocalizedString(R.string.select_parent),
                     onClick = { expanded = true; audio.play(R.raw.sfx_button_click) },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -307,7 +313,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                     username = it
                     usernameError = null
                 },
-                labelText = "Username",
+                labelText = LocalizedString(R.string.username),
                 isError = usernameError != null,
                 errorText = usernameError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -323,7 +329,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                     password = it
                     passwordError = null
                 },
-                labelText = "Password",
+                labelText = LocalizedString(R.string.password),
                 isError = passwordError != null,
                 errorText = passwordError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -343,14 +349,14 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                 exit = fadeOut()
             ) {
                 CloudButtonTwo(
-                    text = "Register",
+                    text = LocalizedString(R.string.register),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(52.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
                         if (!validateChildAll()) {
-                            Toast.makeText(context, "Fix errors", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.fix_errors), Toast.LENGTH_SHORT).show()
                             return@CloudButtonTwo
                         }
 
@@ -365,7 +371,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
                             password = password.trim()
                         ) { id ->
                             if (id != null) {
-                                Toast.makeText(context, "Child Registered", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.registered), Toast.LENGTH_SHORT).show()
                                 navController.navigate("child_login_screen") {
                                     popUpTo("child_registration_screen") { inclusive = true }
                                 }
@@ -376,7 +382,8 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
             }
             Spacer(Modifier.height(12.dp))
 
-            CloudButtonTwo("Back") { navController.popBackStack(); audio.play(R.raw.sfx_button_click) }
+            CloudButtonTwo(LocalizedString(R.string.back)) {
+                navController.popBackStack(); audio.play(R.raw.sfx_button_click) }
         }
     }
 

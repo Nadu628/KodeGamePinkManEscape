@@ -41,6 +41,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.KodeGameApp
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
@@ -94,7 +95,7 @@ fun ChildLoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                stringResource(R.string.child_login),
+                LocalizedString(R.string.child_login),
                 fontSize = 24.sp,
                 fontFamily = bubbleFont,
                 color = Color.White,
@@ -107,7 +108,7 @@ fun ChildLoginScreen(
             CloudTextField(
                 value = username,
                 onValueChange = { username = it.trim(); usernameError = null },
-                labelText = stringResource(R.string.username),
+                labelText = LocalizedString(R.string.username),
                 isError = usernameError != null,
                 errorText = usernameError,
                 modifier = Modifier.fillMaxWidth()
@@ -119,7 +120,7 @@ fun ChildLoginScreen(
             CloudTextField(
                 value = password,
                 onValueChange = { password = it.trim(); passwordError = null },
-                labelText = stringResource(R.string.password),
+                labelText = LocalizedString(R.string.password),
                 isError = passwordError != null,
                 errorText = passwordError,
                 singleLine = true,
@@ -145,7 +146,7 @@ fun ChildLoginScreen(
                 enter = slideInHorizontally(initialOffsetX = { it }),
                 exit = fadeOut()
             ) {
-                CloudButtonTwo(stringResource(R.string.login)) {
+                CloudButtonTwo(LocalizedString(R.string.login)) {
                     if (validateAll()) {
                         viewModel.loginChild(username, password) { child ->
                             if (child != null) {
@@ -161,14 +162,14 @@ fun ChildLoginScreen(
 
             }
             Spacer(modifier = Modifier.height(16.dp))
-            CloudButtonTwo(stringResource(R.string.register)) {
+            CloudButtonTwo(LocalizedString(R.string.register)) {
                 audio.play(R.raw.sfx_button_click)
                 navController.navigate("child_registration_screen")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            CloudButtonTwo(stringResource(R.string.back)) {
+            CloudButtonTwo(LocalizedString(R.string.back)) {
                 audio.play(R.raw.sfx_button_click)
                 navController.navigate("pick_user_screen")
             }

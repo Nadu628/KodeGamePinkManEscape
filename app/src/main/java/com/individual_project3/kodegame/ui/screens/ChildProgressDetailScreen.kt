@@ -44,6 +44,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.individual_project3.kodegame.KodeGameApp
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.data.db.AppDatabase
@@ -106,7 +107,7 @@ fun ChildProgressScreen(
             // ------------ TOP BAR ------------
 
             Text(
-                stringResource(R.string.child_progress),
+                LocalizedString(R.string.child_progress),
                 fontSize = 28.sp,
                 fontFamily = bubbleFont,
                 color = Color.White
@@ -117,13 +118,13 @@ fun ChildProgressScreen(
             // ------------ CHARTS OR EMPTY STATE ------------
             if (records.isEmpty()) {
                 Text(
-                    stringResource(R.string.no_progress),
+                    LocalizedString(R.string.no_progress),
                     color = Color.White,
                     fontSize = 18.sp
                 )
             } else {
                 Text(
-                    stringResource(R.string.strawberries_per_level),
+                    LocalizedString(R.string.strawberries_per_level),
                     fontSize = 22.sp,
                     fontFamily = bubbleFont,
                     color = Color.White
@@ -134,7 +135,7 @@ fun ChildProgressScreen(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    stringResource(R.string.strawberries_per_level_bar),
+                    LocalizedString(R.string.strawberries_per_level_bar),
                     fontSize = 22.sp,
                     fontFamily = bubbleFont,
                     color = Color.White
@@ -147,7 +148,7 @@ fun ChildProgressScreen(
 
             // ------------ BACK BUTTON ------------
             CloudButtonTwo(
-                stringResource(R.string.back_to_dashboard),
+                LocalizedString(R.string.back_to_dashboard),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp)

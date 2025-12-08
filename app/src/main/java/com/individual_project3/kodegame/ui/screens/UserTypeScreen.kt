@@ -1,5 +1,6 @@
 package com.individual_project3.kodegame.ui.screens
 
+import android.app.Activity
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -19,6 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.ui.text.font.Font
 import androidx.compose.runtime.Composable
@@ -35,6 +38,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.IntOffset
@@ -42,35 +46,34 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.KodeGameApp
+import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.splash.JumpSequence
+import com.individual_project3.kodegame.ui.splash.LanguagePickerDialog
 import com.individual_project3.kodegame.ui.splash.RunningCharacter
+import com.individual_project3.kodegame.ui.splash.findActivity
+import com.individual_project3.kodegame.ui.splash.updateAppLocale
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
 @Composable
 fun UserTypeScreen(
     navController: NavController,
     character: @Composable () -> Unit
 ) {
+    val context = LocalContext.current
     val bubbleFont = FontFamily(Font(R.font.poppins_regular))
-
+    val audio = KodeGameApp.audio
     val gradient = Brush.verticalGradient(
         colors = listOf(Color(0xffb3e5fc), Color(0xffb2ff59))
     )
-    val context = LocalContext.current
-    val audio = KodeGameApp.audio
 
-
-    // Load SFX only once for this screen
     LaunchedEffect(Unit) {
         audio.loadSfx(R.raw.sfx_button_click)
+        audio.loadSfx(R.raw.sfx_jump)
     }
-
-
     var userPicked by remember { mutableStateOf(false) }
     var showButtons by remember { mutableStateOf(false) }
 
@@ -90,6 +93,8 @@ fun UserTypeScreen(
 
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
+
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
     // When jump triggered, character bounces up
     val baseY = 40.dp
@@ -133,11 +138,7 @@ fun UserTypeScreen(
             JumpSequence(
                 isVisible = true,
                 spikeYdp = -340.dp,
-                onSpikeNearCenter = {
-                    audio.play(R.raw.sfx_jump)
-                    isJumping = true
-
-                }
+                onSpikeNearCenter = { audio.play(R.raw.sfx_jump); isJumping = true }
             )
         }
 
@@ -150,7 +151,7 @@ fun UserTypeScreen(
         ) {
             if (isRunning) {
                 RunningCharacter(isRunning = true, modifier = Modifier.size(74.dp))
-            }else{
+            } else {
                 character()
             }
         }
@@ -165,18 +166,17 @@ fun UserTypeScreen(
             ) {
 
                 Text(
-                    text = stringResource(R.string.who_are_you),
+                    text = LocalizedString(R.string.who_are_you),
                     fontSize = 24.sp,
                     fontFamily = bubbleFont,
                     color = Color.White,
                     modifier = Modifier.padding(bottom = 28.dp)
                 )
 
-                //child button
                 AnimatedVisibility(
                     visible = showButtons
                 ) {
-                    CloudButtonTwo(stringResource(R.string.i_am_child)) {
+                    CloudButtonTwo(LocalizedString(R.string.i_am_child)) {
                         audio.play(R.raw.sfx_button_click)
                         userPicked = true
                         fadeOut = true
@@ -192,11 +192,10 @@ fun UserTypeScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                //parent button
                 AnimatedVisibility(
                     visible = showButtons
                 ) {
-                    CloudButtonTwo(stringResource(R.string.i_am_parent)) {
+                    CloudButtonTwo(LocalizedString(R.string.i_am_parent)) {
                         audio.play(R.raw.sfx_button_click)
                         userPicked = true
                         fadeOut = true
@@ -211,5 +210,30 @@ fun UserTypeScreen(
                 }
             }
         }
+
+        IconButton(
+            onClick = { showLanguageDialog = true },
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 40.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_language),
+                contentDescription = "Language",
+                tint = Color.Black,
+                modifier = Modifier.size(42.dp)
+            )
+        }
+    }
+
+    if (showLanguageDialog) {
+        LanguagePickerDialog(
+            onDismiss = { showLanguageDialog = false },
+            onLanguageSelected = { locale ->
+                updateAppLocale(locale)
+                showLanguageDialog = false
+            }
+
+        )
     }
 }

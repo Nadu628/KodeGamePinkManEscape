@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">La Fuga de Pink Man</string>
+
+    <!-- Splash Screen -->
+    <string name="welcome">Bienvenido a La Fuga de Pink Man</string>
+    <string name="touch_screen">Toque la pantalla</string>
+    <string name="language">Idioma</string>
+    <string name="choose_language">Elegir idioma</string>
+
+    <!-- User Type Screen -->
+    <string name="who_are_you">¿Quién eres?</string>
+    <string name="i_am_child">Soy un niño</string>
+    <string name="i_am_parent">Soy un padre</string>
+
+    <!-- Login -->
+    <string name="child_login">Inicio de sesión Niño</string>
+    <string name="parent_login">Inicio de sesión Padre</string>
+    <string name="email">Correo electrónico</string>
+    <string name="enter_email">Ingrese el correo electrónico</string>
+    <string name="enter_password">Ingrese la contraseña</string>
+    <string name="enter_username">Ingrese el nombre de usuario</string>
+    <string name="invalid_email">Correo inválido</string>
+    <string name="email_error">Ingrese un correo válido</string>
+    <string name="username">Nombre de usuario</string>
+    <string name="password">Contraseña</string>
+    <string name="login">Iniciar sesión</string>
+    <string name="invalid_credentials">Credenciales inválidas</string>
+    <string name="back">Atrás</string>
+
+    <!-- Registration -->
+    <string name="child_registration">Registro de Niño</string>
+    <string name="parent_registration">Registro de Padre</string>
+    <string name="first_name">Nombre</string>
+    <string name="child_first_name">Nombre del niño</string>
+    <string name="child_last_name">Apellido del niño</string>
+    <string name="enter_child_first_name">Ingrese el nombre del niño</string>
+    <string name="enter_child_last_first_name">Ingrese el apellido del niño</string>
+    <string name="dob_child_blank">Ingrese la fecha de nacimiento del niño</string>
+    <string name="enter_first_name">Ingrese su nombre</string>
+    <string name="is_valid_name">Debe tener entre 3 y 30 caracteres</string>
+    <string name="last_name">Apellido</string>
+    <string name="enter_last_name">Ingrese su apellido</string>
+    <string name="dob">Fecha de nacimiento (MM/DD/AAAA)</string>
+    <string name="child_dob">Fecha de nacimiento del niño (MM/DD/AAAA)</string>
+    <string name="dob_blank">Ingrese su fecha de nacimiento</string>
+    <string name="dob_db">Use MM/DD/AAAA</string>
+    <string name="select_parent">Seleccionar padre</string>
+    <string name="username_blank">Ingrese un nombre de usuario</string>
+    <string name="password_blank">Ingrese una contraseña</string>
+    <string name="username_hint">Debe contener entre 3 y 30 letras o números</string>
+    <string name="password_hint">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="registration_success">¡Registro exitoso!</string>
+    <string name="register">Registrar</string>
+    <string name="fix_errors">Corrija los errores</string>
+
+    <!-- Difficulty -->
+    <string name="choose_difficulty">Elige tu dificultad</string>
+    <string name="easy_mode">Modo Fácil</string>
+    <string name="hard_mode">Modo Difícil</string>
+
+    <!-- Game Screen -->
+    <string name="mode">Modo:</string>
+    <string name="next">Siguiente</string>
+    <string name="exit">Salir</string>
+    <string name="reset">Reiniciar</string>
+    <string name="play">Jugar</string>
+    <string name="loading">Cargando...</string>
+    <string name="if_">Si</string>
+    <string name="until">Hasta</string>
+    <string name="while_">Mientras</string>
+    <string name="func_start">Func [Inicio]</string>
+    <string name="func_end">Func [Fin]</string>
+    <string name="call_func">Llamar Func</string>
+    <string name="drag_commands">Arrastra comandos para crear un programa</string>
+    <string name="repeat_three">Repetir 3x</string>
+    <string name="repeat_times">Repetir %1$d×</string>
+    <string name="while_a_strawberry">Mientras 🍓</string>
+    <string name="func_body">Cuerpo de Función</string>
+
+
+    <!-- Instruction Screen -->
+    <string name="how_to_play">Cómo jugar</string>
+    <string name="start_game">Comenzar juego</string>
+    <string name="easy_instructions">
+    • Déplace Pink Man dans le labyrinthe de nuages\n
+    • Fais glisser et dépose les blocs de flèches (Haut, Bas, Gauche, Droite)\n
+    • Utilise des boucles et des conditions simples\n
+    • Récupère les fraises\n
+    • Évite les piques\n
+    • Atteins l'objectif pour gagner !
+</string>
+
+    <string name="hard_instructions">
+    • Tout ce qu'il y a dans le Mode Facile\n
+    • EN PLUS : fonctions, boucles imbriquées et dangers plus difficiles\n
+    • Réfléchis bien avant de lancer ton programme\n
+    • Planifie à l'avance et teste ta logique
+</string>
+
+
+    <!-- Game completion -->
+    <string name="level_success">¡Nivel completado!</string>
+
+    <!-- Parent Dashboard -->
+    <string name="parent_dashboard">Panel de Padre</string>
+    <string name="no_children_found">No se encontraron niños.</string>
+    <string name="loading_children">Cargando niños...</string>
+    <string name="logout">Cerrar sesión</string>
+    <string name="add_child">Agregar niño</string>
+
+    <!-- Child Progress -->
+    <string name="child_progress">Progreso del niño</string>
+    <string name="no_progress">¡Sin progreso aún!</string>
+    <string name="strawberries_per_level">Fresas por nivel</string>
+    <string name="strawberries_per_level_bar">Fresas por nivel (Barra)</string>
+    <string name="back_to_dashboard">Volver al Panel</string>
+</resources>

@@ -34,6 +34,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -86,27 +88,6 @@ fun GameScreen(
         spriteManager.preloadAllAsync(scope)
     }
 
-    // Animate movement
-    LaunchedEffect(vm.playerState.value?.pos) {
-        val pos = vm.playerState.value?.pos ?: return@LaunchedEffect
-
-        val firstSync = firstPositionSynced.value
-
-        if (!firstSync) {
-            animX.snapTo(pos.x.toFloat())
-            animY.snapTo(pos.y.toFloat())
-            firstPositionSynced.value = true
-        } else {
-            animX.animateTo(
-                targetValue = pos.x.toFloat(),
-                animationSpec = tween(200, easing = LinearEasing)
-            )
-            animY.animateTo(
-                targetValue = pos.y.toFloat(),
-                animationSpec = tween(200, easing = LinearEasing)
-            )
-        }
-    }
 
     // Continuous animation loop for sprite frames
     LaunchedEffect(Unit) {
@@ -163,7 +144,7 @@ fun GameScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 CloudButtonTwo(
-                    text = "Back",
+                    text = stringResource(R.string.back),
                     modifier = Modifier.width(100.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
@@ -172,14 +153,15 @@ fun GameScreen(
                 )
 
                 Text(
-                    text = "Mode: ${difficulty.name}",
+                    text = stringResource(R.string.mode, difficulty.name)
+                    ,
                     fontFamily = bubbleFont,
                     fontSize = 18.sp,
                     color = Color.White
                 )
 
                 CloudButtonTwo(
-                    text = "Exit",
+                    text = stringResource(R.string.exit),
                     modifier = Modifier.width(100.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
@@ -200,7 +182,7 @@ fun GameScreen(
             ) {
                 if (vm.levelCompleted.value) {
                     CloudButtonTwo(
-                        text = "Next",
+                        text = stringResource(R.string.next),
                         modifier = Modifier.width(100.dp),
                         onClick = {
                             audio.play(R.raw.sfx_button_click)
@@ -215,7 +197,7 @@ fun GameScreen(
                 Spacer(Modifier.width(10.dp))
 
                 CloudButtonTwo(
-                    text = "Reset",
+                    text = stringResource(R.string.reset),
                     modifier = Modifier.width(100.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
@@ -228,7 +210,7 @@ fun GameScreen(
                 Spacer(Modifier.width(10.dp))
 
                 CloudButtonTwo(
-                    text = "Play",
+                    text = stringResource(R.string.play),
                     modifier = Modifier.width(100.dp),
                     onClick = {
                         audio.play(R.raw.sfx_button_click)
@@ -267,7 +249,7 @@ fun GameScreen(
 
             if (maze == null) {
                 Text(
-                    "Loading...",
+                    stringResource(R.string.loading),
                     color = Color.White,
                     fontFamily = bubbleFont,
                     fontSize = 20.sp
@@ -278,7 +260,29 @@ fun GameScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     val tileSizeDp = maxWidth / maze.width
+                    val tileSizePx = with(LocalDensity.current) { tileSizeDp.toPx() }
 
+                    // Animate movement
+                    LaunchedEffect(vm.playerState.value?.pos) {
+                        val pos = vm.playerState.value?.pos ?: return@LaunchedEffect
+
+                        val firstSync = firstPositionSynced.value
+
+                        if (!firstSync) {
+                            animX.snapTo(pos.x.toFloat())
+                            animY.snapTo(pos.y.toFloat())
+                            firstPositionSynced.value = true
+                        } else {
+                            animX.animateTo(
+                                targetValue = pos.x.toFloat(),
+                                animationSpec = tween(200, easing = LinearEasing)
+                            )
+                            animY.animateTo(
+                                targetValue = pos.y.toFloat(),
+                                animationSpec = tween(200, easing = LinearEasing)
+                            )
+                        }
+                    }
                     val frame = when (vm.playerAnimState.value) {
                         PlayerAnimState.Jump ->
                             spriteManager.playerJumpFrames.getOrNull(playerFrameIndex)
@@ -340,17 +344,17 @@ fun CommandPaletteBar(
 
         // EASY + HARD
         if (difficulty == DifficultyMode.EASY || difficulty == DifficultyMode.HARD) {
-            add("Repeat 3×" to UiCommand.Repeat(3))
-            add("If 🍓" to UiCommand.IfHasStrawberry())
+            add(stringResource(R.string.repeat_three) to UiCommand.Repeat(3))
+            add(stringResource(R.string.if_) to UiCommand.IfHasStrawberry())
         }
 
         // HARD only
         if (difficulty == DifficultyMode.HARD) {
-            add("Until 🏁" to UiCommand.RepeatUntilGoal())
-            add("While 🍓" to UiCommand.RepeatWhileHasStrawberry())
-            add("Func ⟦Start⟧" to UiCommand.FunctionStart)
-            add("Func ⟦End⟧" to UiCommand.EndFunction)
-            add("Call Func" to UiCommand.FunctionCall)
+            add(stringResource(R.string.until) to UiCommand.RepeatUntilGoal())
+            add(stringResource(R.string.while_) to UiCommand.RepeatWhileHasStrawberry())
+            add(stringResource(R.string.func_start) to UiCommand.FunctionStart)
+            add(stringResource(R.string.func_end) to UiCommand.EndFunction)
+            add(stringResource(R.string.call_func) to UiCommand.FunctionCall)
         }
     }
 
@@ -458,7 +462,7 @@ fun ProgramTrackBar(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "Drag commands to build a program",
+                    stringResource(R.string.drag_commands),
                     fontSize = 14.sp,
                     color = Color.Black.copy(alpha = 0.7f)
                 )
@@ -473,24 +477,25 @@ fun ProgramTrackBar(
                     items = program,
                     key = { index, cmd -> index * 31 + cmd::class.hashCode() }
                 ) { index, cmd ->
-
+                    val context = LocalContext.current
                     val label = when (cmd) {
                         UiCommand.MoveUp -> "↑"
                         UiCommand.MoveDown -> "↓"
                         UiCommand.MoveLeft -> "←"
                         UiCommand.MoveRight -> "→"
 
-                        is UiCommand.Repeat -> "Repeat ${cmd.times}×"
-                        is UiCommand.IfHasStrawberry -> "If 🍓"
+                        is UiCommand.Repeat -> stringResource(R.string.repeat_times, cmd.times)
 
-                        UiCommand.FunctionStart -> "Func ⟦Start⟧"
-                        UiCommand.EndFunction -> "Func ⟦End⟧"
-                        UiCommand.FunctionCall -> "Call Func"
+                        is UiCommand.IfHasStrawberry -> stringResource(R.string.if_)
 
-                        is UiCommand.RepeatUntilGoal -> "Until 🏁"
-                        is UiCommand.RepeatWhileHasStrawberry -> "While 🍓"
+                        UiCommand.FunctionStart -> stringResource(R.string.func_start)
+                        UiCommand.EndFunction -> stringResource(R.string.func_end)
+                        UiCommand.FunctionCall -> stringResource(R.string.call_func)
 
-                        is UiCommand.FunctionDefinition -> "FuncBody"
+                        is UiCommand.RepeatUntilGoal -> stringResource(R.string.until)
+                        is UiCommand.RepeatWhileHasStrawberry -> context.getString(R.string.while_a_strawberry)
+
+                        is UiCommand.FunctionDefinition -> stringResource(R.string.func_body)
                     }
 
                     DraggableTrackBlock(label) {
@@ -502,87 +507,6 @@ fun ProgramTrackBar(
     }
 }
 
-@Composable
-fun RepeatBlockEditor(
-    repeat: UiCommand.Repeat,
-    onRemove: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .width(150.dp)
-            .background(Color(0xFFE8F5E9), RoundedCornerShape(12.dp))
-            .padding(8.dp)
-    ) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("Repeat ${repeat.times}×", fontSize = 16.sp)
-            Text(
-                "✕",
-                modifier = Modifier
-                    .clickable { onRemove() },
-                color = Color.Red
-            )
-        }
-
-        Spacer(Modifier.height(6.dp))
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White.copy(alpha = .4f), RoundedCornerShape(8.dp))
-                .padding(6.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            repeat.body.forEach { sub ->
-                Text("• " + sub.toString().replace("UiCommand.", ""))
-            }
-        }
-    }
-}
-
-@Composable
-fun IfBlockEditor(
-    ifBlock: UiCommand.IfHasStrawberry,
-    onRemove: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .width(150.dp)
-            .background(Color(0xFFE3F2FD), RoundedCornerShape(12.dp))
-            .padding(8.dp)
-    ) {
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("If 🍓", fontSize = 16.sp)
-            Text(
-                "✕",
-                modifier = Modifier
-                    .clickable { onRemove() },
-                color = Color.Red
-            )
-        }
-
-        Spacer(Modifier.height(6.dp))
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White.copy(alpha = .4f), RoundedCornerShape(8.dp))
-                .padding(6.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            ifBlock.body.forEach { sub ->
-                Text("• " + sub.toString().replace("UiCommand.", ""))
-            }
-        }
-    }
-}
 
 @Composable
 fun DraggableTrackBlock(

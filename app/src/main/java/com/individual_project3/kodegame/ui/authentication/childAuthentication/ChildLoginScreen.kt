@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
@@ -41,7 +42,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.R
-import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.authentication.AuthViewModel
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 import com.individual_project3.kodegame.ui.theme.CloudTextField
@@ -73,13 +73,13 @@ fun ChildLoginScreen(
     var usernameError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
 
-    fun validateALl(): Boolean {
+    fun validateAll(): Boolean {
         var ok = true
         if (username.isBlank()) {
-            usernameError = "Enter username"; ok = false
+            usernameError = context.getString(R.string.username_blank); ok = false
         }
         if (password.isBlank()) {
-            passwordError = "Enter password"; ok = false
+            passwordError = context.getString(R.string.password_blank); ok = false
         }
         return ok
     }
@@ -94,7 +94,7 @@ fun ChildLoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Child Login",
+                stringResource(R.string.child_login),
                 fontSize = 24.sp,
                 fontFamily = bubbleFont,
                 color = Color.White,
@@ -107,7 +107,7 @@ fun ChildLoginScreen(
             CloudTextField(
                 value = username,
                 onValueChange = { username = it.trim(); usernameError = null },
-                labelText = "Username",
+                labelText = stringResource(R.string.username),
                 isError = usernameError != null,
                 errorText = usernameError,
                 modifier = Modifier.fillMaxWidth()
@@ -119,7 +119,7 @@ fun ChildLoginScreen(
             CloudTextField(
                 value = password,
                 onValueChange = { password = it.trim(); passwordError = null },
-                labelText = "Password",
+                labelText = stringResource(R.string.password),
                 isError = passwordError != null,
                 errorText = passwordError,
                 singleLine = true,
@@ -145,14 +145,14 @@ fun ChildLoginScreen(
                 enter = slideInHorizontally(initialOffsetX = { it }),
                 exit = fadeOut()
             ) {
-                CloudButtonTwo("Login") {
-                    if (validateALl()) {
+                CloudButtonTwo(stringResource(R.string.login)) {
+                    if (validateAll()) {
                         viewModel.loginChild(username, password) { child ->
                             if (child != null) {
                                 audio.play(R.raw.sfx_button_click)
                                 navController.navigate("difficulty_screen")
                             } else {
-                                Toast.makeText(context, "Invalid credentials", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, context.getString(R.string.invalid_credentials), Toast.LENGTH_SHORT)
                                     .show()
                             }
                         }
@@ -161,14 +161,14 @@ fun ChildLoginScreen(
 
             }
             Spacer(modifier = Modifier.height(16.dp))
-            CloudButtonTwo("Register") {
+            CloudButtonTwo(stringResource(R.string.register)) {
                 audio.play(R.raw.sfx_button_click)
                 navController.navigate("child_registration_screen")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            CloudButtonTwo("Back") {
+            CloudButtonTwo(stringResource(R.string.back)) {
                 audio.play(R.raw.sfx_button_click)
                 navController.navigate("pick_user_screen")
             }

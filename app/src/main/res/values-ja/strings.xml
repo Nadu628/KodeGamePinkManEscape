@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- App Name -->
+    <string name="app_name">ピンクマンの脱出</string>
+
+    <!-- Splash Screen -->
+    <string name="welcome">ピンクマンの脱出へようこそ</string>
+    <string name="touch_screen">画面をタップしてください</string>
+    <string name="language">言語</string>
+    <string name="choose_language">言語を選択</string>
+
+    <!-- User Type Screen -->
+    <string name="who_are_you">あなたは誰ですか？</string>
+    <string name="i_am_child">子ども</string>
+    <string name="i_am_parent">保護者</string>
+
+    <!-- Login -->
+    <string name="child_login">子どもログイン</string>
+    <string name="parent_login">保護者ログイン</string>
+    <string name="email">メール</string>
+    <string name="enter_email">メールを入力</string>
+    <string name="enter_password">パスワードを入力</string>
+    <string name="enter_username">ユーザー名を入力</string>
+    <string name="invalid_email">無効なメールです</string>
+    <string name="email_error">有効なメールアドレスを入力してください</string>
+    <string name="username">ユーザー名</string>
+    <string name="password">パスワード</string>
+    <string name="login">ログイン</string>
+    <string name="invalid_credentials">ログイン情報が正しくありません</string>
+    <string name="back">戻る</string>
+
+    <!-- Registration -->
+    <string name="child_registration">子ども登録</string>
+    <string name="parent_registration">保護者登録</string>
+    <string name="first_name">名</string>
+    <string name="child_first_name">子どもの名</string>
+    <string name="child_last_name">子どもの姓</string>
+    <string name="enter_child_first_name">子どもの名を入力</string>
+    <string name="enter_child_last_first_name">子どもの姓を入力</string>
+    <string name="dob_child_blank">子どもの生年月日を入力</string>
+    <string name="enter_first_name">名を入力</string>
+    <string name="is_valid_name">3〜30文字で入力してください</string>
+    <string name="last_name">姓</string>
+    <string name="enter_last_name">姓を入力</string>
+    <string name="dob">生年月日 (MM/DD/YYYY)</string>
+    <string name="child_dob">子どもの生年月日 (MM/DD/YYYY)</string>
+    <string name="dob_blank">生年月日を入力してください</string>
+    <string name="dob_db">MM/DD/YYYY の形式で入力してください</string>
+    <string name="select_parent">保護者を選択</string>
+    <string name="username_blank">ユーザー名を入力</string>
+    <string name="password_blank">パスワードを入力</string>
+    <string name="username_hint">3〜30文字の英数字</string>
+    <string name="password_hint">パスワードは6文字以上</string>
+    <string name="registration_success">登録完了！</string>
+    <string name="register">登録</string>
+    <string name="fix_errors">エラーを修正してください</string>
+
+    <!-- Difficulty -->
+    <string name="choose_difficulty">難易度を選択</string>
+    <string name="easy_mode">かんたんモード</string>
+    <string name="hard_mode">むずかしいモード</string>
+
+    <!-- Game screen -->
+    <string name="mode">モード：</string>
+    <string name="next">次へ</string>
+    <string name="exit">終了</string>
+    <string name="reset">リセット</string>
+    <string name="play">プレイ</string>
+    <string name="loading">読み込み中...</string>
+    <string name="if_">もし</string>
+    <string name="until">〜まで</string>
+    <string name="while_">〜の間</string>
+    <string name="func_start">関数［開始］</string>
+    <string name="func_end">関数［終了］</string>
+    <string name="call_func">関数をよぶ</string>
+    <string name="drag_commands">ブロックをドラッグしてプログラムを作ろう</string>
+    <string name="repeat_three">3回繰り返す</string>
+    <string name="repeat_times">%1$d回繰り返す</string>
+    <string name="while_a_strawberry">🍓 の間</string>
+    <string name="func_body">関数の本体</string>
+
+
+    <!-- Instruction Screen -->
+    <string name="how_to_play">遊び方</string>
+    <string name="start_game">ゲーム開始</string>
+
+    <string name="easy_instructions">
+        • ピンクマンを雲の迷路の中で動かそう\n
+        • 矢印ブロック（上・下・左・右）をドラッグ＆ドロップ\n
+        • かんたんなループや条件文を使おう\n
+        • いちごを集めよう\n
+        • トゲをさけよう\n
+        • ゴールに着いたらクリア！
+    </string>
+
+    <string name="hard_instructions">
+        • かんたんモードのすべて\n
+        • さらに：関数、入れ子ループ、むずかしいトラップ\n
+        • 実行する前にロジックをよく考えよう\n
+        • 計画してテストしよう
+    </string>
+
+    <!-- Game completion -->
+    <string name="level_success">レベルクリア！</string>
+
+    <!-- Parent Dashboard -->
+    <string name="parent_dashboard">保護者ダッシュボード</string>
+    <string name="no_children_found">子どもが見つかりません。</string>
+    <string name="loading_children">子どもを読み込み中...</string>
+    <string name="logout">ログアウト</string>
+    <string name="add_child">子どもを追加</string>
+
+    <!-- Child Progress -->
+    <string name="child_progress">子どもの進捗</string>
+    <string name="no_progress">まだデータがありません！</string>
+    <string name="strawberries_per_level">レベルごとのいちご数</string>
+    <string name="strawberries_per_level_bar">レベルごとのいちご数（バー）</string>
+    <string name="back_to_dashboard">ダッシュボードに戻る</string>
+
+</resources>

@@ -23,20 +23,10 @@ import com.individual_project3.kodegame.ui.theme.KodeGameTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val audio = AudioManager(this)
-        audio.loadSfx(
-            R.raw.sfx_button_click,
-            R.raw.sfx_jump,
-            R.raw.sfx_drop,
-            R.raw.sfx_hit,
-            R.raw.sfx_collecting_fruit,
-            R.raw.sfx_success
-        )
-
-        audio.startBackground(R.raw.sfx_game_music)
         setContent {
             Navigation()
         }
+        KodeGameApp.audio.startBackground(R.raw.sfx_game_music)
 
     }
 

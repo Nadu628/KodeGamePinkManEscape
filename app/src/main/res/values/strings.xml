@@ -1,3 +1,118 @@
 <resources>
-    <string name="app_name">KodeGame</string>
+    <string name="app_name">Pink Man\'s Escape</string>
+
+    <!-- Splash Screen -->
+    <string name="welcome">Welcome to Pink Man\'s Escape</string>
+    <string name="touch_screen">Touch the Screen</string>
+    <string name="language">🌐Language</string>
+    <string name="choose_language">Choose Language</string>
+
+    <!-- User Type Screen -->
+    <string name="who_are_you">Who are you?</string>
+    <string name="i_am_child">I am a Child</string>
+    <string name="i_am_parent">I am a Parent</string>
+
+    <!-- Login -->
+    <string name="child_login">Child Login</string>
+    <string name="parent_login">Parent Login</string>
+    <string name="email">Email</string>
+    <string name="enter_email">Enter email</string>
+    <string name="enter_password">Enter password</string>
+    <string name="enter_username">Enter username</string>
+    <string name="invalid_email">Invalid email</string>
+    <string name="email_error">Enter a valid email address</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="invalid_credentials">Invalid Credentials</string>
+    <string name="back">Back</string>
+
+    <!-- Registration -->
+    <string name="child_registration">Child Registration</string>
+    <string name="parent_registration">Parent Registration</string>
+    <string name="first_name">First Name</string>
+    <string name="child_first_name">Child\'s First Name</string>
+    <string name="child_last_name">Child\'s Last Name</string>
+    <string name="enter_child_first_name">Enter your child\'s first name</string>
+    <string name="enter_child_last_name">Enter your child\'s last name</string>
+    <string name="dob_child_blank">Enter child\'s date of birth</string>
+    <string name="enter_first_name">Enter your first name</string>
+    <string name="is_valid_name">Must be 3–30 characters</string>
+    <string name="last_name">Last Name</string>
+    <string name="enter_last_name">Enter your last name</string>
+    <string name="dob">Date of Birth (MM/DD/YYYY)</string>
+    <string name="child_dob">Child\'s Date of Birth (MM/DD/YYYY)</string>
+    <string name="dob_blank">Enter your date of birth</string>
+    <string name="dob_db">Use MM/DD/YYYY</string>
+    <string name="select_parent">Select Parent</string>
+    <string name="username_blank">Enter a username</string>
+    <string name="password_blank">Enter a password</string>
+    <string name="username_hint">Must be 3–30 letters or numbers</string>
+    <string name="password_hint">Password must be at least 6 characters</string>
+    <string name="registration_success">Registered!</string>
+    <string name="register">Register</string>
+    <string name="fix_errors">Fix errors</string>
+
+
+    <!-- Difficulty -->
+    <string name="choose_difficulty">Choose Your Difficulty</string>
+    <string name="easy_mode">Easy Mode</string>
+    <string name="hard_mode">Hard Mode</string>
+
+
+    <!-- Game screen -->
+    <string name="mode">Mode: %1$s</string>
+    <string name="next">Next</string>
+    <string name="exit">Exit</string>
+    <string name="reset">Reset</string>
+    <string name="play">Play</string>
+    <string name="loading">Loading...</string>
+    <string name="repeat_three">Repeat 3x</string>
+    <string name="repeat_times">Repeat %1$d×</string>
+    <string name="if_">If 🍓</string>
+    <string name="until">Until 🏁</string>
+    <string name="while_">While</string>
+    <string name="while_a_strawberry">While 🍓</string>
+    <string name="func_start">Func [Start]</string>
+    <string name="func_end">Func [End]</string>
+    <string name="call_func">Call Func</string>
+    <string name="func_body">Func Body</string>
+    <string name="drag_commands">Drag commands to build a program</string>
+
+    <!-- Instruction Screen -->
+    <string name="how_to_play">How to Play</string>
+    <string name="start_game">Start Game</string>
+    <string name="easy_instructions">
+    • Move Pink Man through the cloud maze\n
+    • Drag and drop arrow blocks (Up, Down, Left, Right)\n
+    • Use simple loops and conditions\n
+    • Collect strawberries\n
+    • Avoid spikes\n
+    • Reach the goal to win!
+</string>
+
+    <string name="hard_instructions">
+    • Everything from Easy Mode\n
+    • PLUS: functions, nested loops, and trickier hazards\n
+    • Think carefully before you run your program\n
+    • Plan ahead and test your logic
+</string>
+
+
+    <!-- Game completion -->
+    <string name="level_success">Level Complete!</string>
+
+    <!-- Parent Dashboard -->
+    <string name="parent_dashboard">Parent Dashboard</string>
+    <string name="no_children_found">No children found.</string>
+    <string name="loading_children">Loading children...</string>
+    <string name="logout">Logout</string>
+    <string name="add_child">➕ Add Child</string>
+
+    <!-- Child Progress -->
+    <string name="child_progress">Child Progress</string>
+    <string name="no_progress">No progress yet!</string>
+    <string name="strawberries_per_level">Strawberries per Level</string>
+    <string name="strawberries_per_level_bar">Strawberries per Level (Bar)</string>
+    <string name="back_to_dashboard">Back to Dashboard</string>
 </resources>

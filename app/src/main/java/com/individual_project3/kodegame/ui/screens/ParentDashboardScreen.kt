@@ -1,10 +1,8 @@
 package com.individual_project3.kodegame.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,14 +13,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalGraphicsContext
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -32,12 +27,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.data.db.AppDatabase
 import com.individual_project3.kodegame.R
-import com.individual_project3.kodegame.data.progress.LevelProgressCard
 import com.individual_project3.kodegame.ui.viewModel.ParentDashboardViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.individual_project3.kodegame.KodeGameApp
-import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.data.progress.ChildProgressCard
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 
@@ -91,36 +83,16 @@ fun ParentDashboardScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
+            Spacer(modifier = Modifier.height(20.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Text(
+                stringResource(R.string.parent_dashboard), fontSize = 32.sp, fontFamily = bubbleFont, color = Color.White
+            )
 
-                Text(
-                    "Parent Dashboard",
-                    fontSize = 32.sp,
-                    fontFamily = bubbleFont,
-                    color = Color.White
-                )
-
-                CloudButtonTwo(
-                    text = "Logout",
-                    modifier = Modifier.height(50.dp)
-                ) {
-                    audio.play(R.raw.sfx_button_click)
-                    navController.navigate("pick_user_screen") {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            }
+            Spacer(modifier = Modifier.height(8.dp))
 
             CloudButtonTwo(
-                text = "➕ Add Child",
-                modifier = Modifier
+                text = stringResource(R.string.add_child), modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)
             ) {
@@ -132,15 +104,11 @@ fun ParentDashboardScreen(
 
             when {
                 uiState.loading -> Text(
-                    "Loading children...",
-                    fontFamily = bubbleFont,
-                    color = Color.White
+                    stringResource(R.string.loading), fontFamily = bubbleFont, color = Color.White
                 )
 
                 uiState.children.isEmpty() -> Text(
-                    "No children found.",
-                    fontFamily = bubbleFont,
-                    color = Color.White
+                    stringResource(R.string.no_children_found), fontFamily = bubbleFont, color = Color.White
                 )
 
                 else -> {
@@ -148,17 +116,29 @@ fun ParentDashboardScreen(
 
                         // Child Card (tappable)
                         ChildProgressCard(
-                            child = child,
-                            onClick = {
+                            child = child, onClick = {
                                 audio.play(R.raw.sfx_button_click)
                                 navController.navigate("child_progress/${child.childId}")
-                            }
-                        )
+                            })
 
                         Spacer(Modifier.height(12.dp))
                     }
                 }
             }
+
+            Spacer(Modifier.height(20.dp))
+
+            CloudButtonTwo(
+                text = stringResource(R.string.logout), modifier = Modifier
+                    .height(50.dp)
+                    .fillMaxWidth()
+            ) {
+                audio.play(R.raw.sfx_button_click)
+                navController.navigate("pick_user_screen") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
         }
+
     }
 }

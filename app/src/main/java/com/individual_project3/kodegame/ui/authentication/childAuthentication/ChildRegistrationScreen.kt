@@ -88,7 +88,7 @@ fun ChildRegistrationScreen(navController: NavController, viewModel: AuthViewMod
     val inputFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy")
     val dbFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
-    //helper to convery MM/DD/YYYY -> yyyy-mm-dd
+    //helper to convert MM/DD/YYYY -> yyyy-mm-dd
     fun parseDobForDb(value: String): String? {
         return try {
             val parsed = LocalDate.parse(value, inputFormatter)

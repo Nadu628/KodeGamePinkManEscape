@@ -9,12 +9,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
@@ -23,7 +23,6 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.R
-import com.individual_project3.kodegame.assets.audio.AudioManager
 import com.individual_project3.kodegame.ui.theme.CloudButtonTwo
 
 @Composable
@@ -47,21 +46,9 @@ fun GameInstructionsScreen(
     }
 
     val instructions = when (difficulty) {
-        "easy" -> """
-            • Move Pink Man through the cloud maze  
-            • Drag and drop arrow blocks (Up, Down, Left, Right)  
-            • Use simple loops and conditions  
-            • Collect strawberries  
-            • Avoid spikes  
-            • Reach the goal to win!
-        """.trimIndent()
+        "easy" -> stringResource(R.string.easy_instructions).trimIndent()
 
-        else -> """
-            • Everything from Easy Mode  
-            • PLUS: functions, nested loops, and trickier hazards  
-            • Think carefully before you run your program  
-            • Plan ahead and test your logic  
-        """.trimIndent()
+        else -> stringResource(R.string.hard_instructions).trimIndent()
     }
 
 
@@ -80,7 +67,7 @@ fun GameInstructionsScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "How to Play",
+                stringResource(R.string.how_to_play),
                 fontSize = 28.sp,
                 fontFamily = bubbleFont,
                 textAlign = TextAlign.Center,
@@ -98,7 +85,7 @@ fun GameInstructionsScreen(
             )
 
             CloudButtonTwo(
-                text = "Start Game",
+                stringResource(R.string.start_game),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(70.dp)
@@ -110,7 +97,7 @@ fun GameInstructionsScreen(
             Spacer(modifier = Modifier.height(20.dp))
 
             CloudButtonTwo(
-                text = "Back",
+                text = stringResource(R.string.back),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(60.dp)

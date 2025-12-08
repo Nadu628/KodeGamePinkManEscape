@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -94,6 +95,7 @@ fun ChildProgressScreen(
             .background(gradient)
     ) {
 
+        Spacer(modifier = Modifier.height(20.dp))
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -102,44 +104,26 @@ fun ChildProgressScreen(
         ) {
 
             // ------------ TOP BAR ------------
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 10.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
 
-                Text(
-                    "Child Progress",
-                    fontSize = 28.sp,
-                    fontFamily = bubbleFont,
-                    color = Color.White
-                )
-
-                CloudButtonTwo(
-                    text = "Logout",
-                    modifier = Modifier.height(50.dp)
-                ) {
-                    audio.play(R.raw.sfx_button_click)
-                    navController.navigate("pick_user_screen") {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            }
+            Text(
+                stringResource(R.string.child_progress),
+                fontSize = 28.sp,
+                fontFamily = bubbleFont,
+                color = Color.White
+            )
 
             Spacer(Modifier.height(16.dp))
 
             // ------------ CHARTS OR EMPTY STATE ------------
             if (records.isEmpty()) {
                 Text(
-                    "No progress yet!",
+                    stringResource(R.string.no_progress),
                     color = Color.White,
                     fontSize = 18.sp
                 )
             } else {
                 Text(
-                    text = "Strawberries per Level",
+                    stringResource(R.string.strawberries_per_level),
                     fontSize = 22.sp,
                     fontFamily = bubbleFont,
                     color = Color.White
@@ -150,7 +134,7 @@ fun ChildProgressScreen(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = "Strawberries per Level (Bar)",
+                    stringResource(R.string.strawberries_per_level_bar),
                     fontSize = 22.sp,
                     fontFamily = bubbleFont,
                     color = Color.White
@@ -163,7 +147,7 @@ fun ChildProgressScreen(
 
             // ------------ BACK BUTTON ------------
             CloudButtonTwo(
-                text = "Back",
+                stringResource(R.string.back_to_dashboard),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 12.dp)
@@ -172,8 +156,10 @@ fun ChildProgressScreen(
                 navController.popBackStack()
             }
         }
+
     }
 }
+
 
 
 // ---------------------------------------------------------

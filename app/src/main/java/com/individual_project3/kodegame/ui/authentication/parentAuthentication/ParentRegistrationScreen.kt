@@ -40,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -150,15 +151,15 @@ fun ParentRegistrationScreen(
 
         //parent name
         parentFNError = when{
-            parentFN.isBlank() -> "Enter your first name"
-            !isValidName(parentFN) -> "Must be 3-30 letters"
+            parentFN.isBlank() -> context.getString(R.string.enter_first_name)
+            !isValidName(parentFN) -> context.getString(R.string.is_valid_name)
             else -> null
         }
         if(parentFNError != null) ok = false
 
         parentLNError = when{
-            parentLN.isBlank() -> "Enter your last name"
-            !isValidName(parentLN) -> "Must be 3-30 letters"
+            parentLN.isBlank() -> context.getString(R.string.enter_last_name)
+            !isValidName(parentLN) -> context.getString(R.string.is_valid_name)
             else -> null
         }
         if(parentLNError != null) ok = false
@@ -166,23 +167,23 @@ fun ParentRegistrationScreen(
         //parent dob -> must be 18+
         val parentDobDb = parseDobForDb(parentDOB)
         parentDOBError = when {
-            parentDOB.isBlank() -> "Enter your date of birth"
-            parentDobDb == null -> "Use MM/DD/YYYY"
+            parentDOB.isBlank() -> context.getString(R.string.dob)
+            parentDobDb == null -> context.getString(R.string.dob_db)
             else -> null
         }
         if (parentDOBError != null) ok = false
 
         //child name
         childFNError = when{
-            childFN.isBlank() -> "Enter your child's first name"
-            !isValidName(childFN) -> "Must be 3-30 letters"
+            childFN.isBlank() -> context.getString(R.string.enter_child_first_name)
+            !isValidName(childFN) -> context.getString(R.string.is_valid_name)
             else -> null
         }
         if(childFNError != null) ok = false
 
         childLNError = when{
-            childLN.isBlank() -> "Enter your child's last name"
-            !isValidName(childLN) -> "Must be 3-30 letters"
+            childLN.isBlank() -> context.getString(R.string.enter_child_last_first_name)
+            !isValidName(childLN) -> context.getString(R.string.is_valid_name)
             else -> null
         }
         if(childLNError != null) ok = false
@@ -190,23 +191,23 @@ fun ParentRegistrationScreen(
         //child DOB
         val childDobDb = parseDobForDb(childDOB)
         childDOBError = when {
-            childDOB.isBlank() -> "Enter child's date of birth"
-            childDobDb == null -> "Use MM/DD/YYYY"
+            childDOB.isBlank() -> context.getString(R.string.child_dob)
+            childDobDb == null -> context.getString(R.string.dob_db)
             else -> null
         }
         if (childDOBError != null) ok = false
 
         //email
         emailError = when{
-            email.isBlank() -> "Enter email"
-            !isValidEmail(email) -> "Enter a valid email address"
+            email.isBlank() -> context.getString(R.string.enter_email)
+            !isValidEmail(email) -> context.getString(R.string.invalid_email)
             else -> null
         }
         if(emailError != null) ok = false
 
         //password
         passwordError = when{
-            password.length < 6 -> "Password must be at least 6 characters"
+            password.length < 6 -> context.getString(R.string.password_hint)
             else -> null
         }
         if(passwordError != null) ok = false
@@ -230,7 +231,7 @@ fun ParentRegistrationScreen(
         ){
             //Screen title
             Text(
-                text = "Parent Registration",
+                stringResource(R.string.parent_registration),
                 fontSize = 20.sp,
                 fontFamily = bubbleFont,
                 modifier = Modifier.padding(bottom = 12.dp)
@@ -245,7 +246,7 @@ fun ParentRegistrationScreen(
                     parentFN = it
                     parentFNError = null
                 },
-                labelText = "First Name",
+                stringResource(R.string.first_name),
                 isError = parentFNError != null,
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -259,7 +260,7 @@ fun ParentRegistrationScreen(
                     parentLN = it
                     parentLNError = null
                 },
-                labelText = "Last Name",
+                stringResource(R.string.last_name),
                 isError = parentLNError != null,
                 errorText = parentLNError,
                 modifier = Modifier.fillMaxWidth()
@@ -274,7 +275,7 @@ fun ParentRegistrationScreen(
                     parentDOB = it
                     parentDOBError = null
                 },
-                labelText = "Date of Birth (MM/DD/YYYY)",
+                stringResource(R.string.dob),
                 isError = parentDOBError != null,
                 errorText = parentDOBError,
                 trailingIcon = {
@@ -301,7 +302,7 @@ fun ParentRegistrationScreen(
                     childFN = it
                     childFNError = null
                 },
-                labelText = "Child's First Name",
+                stringResource(R.string.child_first_name),
                 isError = childFNError != null,
                 errorText = childFNError,
                 modifier = Modifier.fillMaxWidth()
@@ -315,7 +316,7 @@ fun ParentRegistrationScreen(
                     childLN = it
                     childLNError = null
                 },
-                labelText = "Child's Last Name",
+                stringResource(R.string.child_last_name),
                 isError = childLNError != null,
                 errorText = childLNError,
                 modifier = Modifier.fillMaxWidth()
@@ -330,7 +331,7 @@ fun ParentRegistrationScreen(
                     childDOB = it
                     childDOBError = null
                 },
-                labelText = "Child's Date of Birth (MM/DD/YYYY)",
+                stringResource(R.string.child_dob),
                 isError = childDOBError != null,
                 errorText = childDOBError,
                 trailingIcon = {
@@ -357,7 +358,7 @@ fun ParentRegistrationScreen(
                     email = it
                     emailError = null
                 },
-                labelText = "Email",
+                stringResource(R.string.email),
                 isError = emailError != null,
                 errorText = emailError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -373,7 +374,7 @@ fun ParentRegistrationScreen(
                     password = it
                     passwordError = null
                 },
-                labelText = "Password",
+                stringResource(R.string.password),
                 isError = passwordError != null,
                 errorText = passwordError,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -426,7 +427,7 @@ fun ParentRegistrationScreen(
                                     popUpTo("splash_screen") { inclusive = true }
                                 }
                             }else{
-                                Toast.makeText(context, "Please fix errors", Toast.LENGTH_SHORT ).show()
+                                Toast.makeText(context, "Fix errors", Toast.LENGTH_SHORT ).show()
                             }
                         }
 

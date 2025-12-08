@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -164,7 +165,7 @@ fun UserTypeScreen(
             ) {
 
                 Text(
-                    text = "Who are you?",
+                    text = stringResource(R.string.who_are_you),
                     fontSize = 24.sp,
                     fontFamily = bubbleFont,
                     color = Color.White,
@@ -175,7 +176,7 @@ fun UserTypeScreen(
                 AnimatedVisibility(
                     visible = showButtons
                 ) {
-                    CloudButtonTwo("I am a Child") {
+                    CloudButtonTwo(stringResource(R.string.i_am_child)) {
                         audio.play(R.raw.sfx_button_click)
                         userPicked = true
                         fadeOut = true
@@ -195,7 +196,7 @@ fun UserTypeScreen(
                 AnimatedVisibility(
                     visible = showButtons
                 ) {
-                    CloudButtonTwo("I am a Parent") {
+                    CloudButtonTwo(stringResource(R.string.i_am_parent)) {
                         audio.play(R.raw.sfx_button_click)
                         userPicked = true
                         fadeOut = true

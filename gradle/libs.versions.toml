@@ -19,6 +19,7 @@ material3Lint = "1.4.0"
 databindingCompiler = "8.13.1"
 animation = "1.9.5"
 material3 = "1.4.0"
+foundationLayout = "1.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,7 @@ androidx-material3-lint = { group = "androidx.compose.material3", name = "materi
 androidx-databinding-compiler = { group = "androidx.databinding", name = "databinding-compiler", version.ref = "databindingCompiler" }
 androidx-animation = { group = "androidx.compose.animation", name = "animation", version.ref = "animation" }
 material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
+androidx-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout", version.ref = "foundationLayout" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

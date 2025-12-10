@@ -82,6 +82,11 @@
     <string name="while_a_strawberry">Pandan 🍓</string>
     <string name="func_body">Ko Fonksyon</string>
 
+    <!-- Pause Screen -->
+    <string name="resume">Kontinye</string>
+    <string name="music">Mizik</string>
+
+
     <!-- Instruction Screen -->
     <string name="how_to_play">Kijan pou jwe</string>
     <string name="start_game">Komanse jwèt la</string>

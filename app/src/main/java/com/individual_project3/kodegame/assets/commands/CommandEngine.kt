@@ -81,40 +81,37 @@ class CommandEngine(
                 ensureActive()
 
                 when (cmd) {
-
-                    is Command.Move -> {
-                        movePlayer(cmd.dir)
-                    }
+                    is Command.Move -> movePlayer(cmd.dir)
 
                     is Command.Repeat -> {
                         val times = max(0, cmd.times)
                         repeat(times) {
-                            executeList(cmd.body, depth + 1)
+                            executeList(listOf(cmd.inner), depth + 1)
                         }
                     }
 
                     is Command.IfHasStrawberries -> {
                         if (state.strawberries >= cmd.min) {
-                            executeList(cmd.body, depth + 1)
+                            executeList(listOf(cmd.inner), depth + 1)
                         }
                     }
 
                     is Command.RepeatUntilGoal -> {
                         while (state.pos != maze.goal) {
-                            executeList(cmd.body, depth + 1)
+                            executeList(listOf(cmd.inner), depth + 1)
                             ensureActive()
                         }
                     }
 
                     is Command.RepeatWhileHasStrawberries -> {
                         while (state.strawberries > 0) {
-                            executeList(cmd.body, depth + 1)
+                            executeList(listOf(cmd.inner), depth + 1)
                             ensureActive()
                         }
                     }
 
                     is Command.FunctionDefinition -> {
-                        functionBody = cmd.body
+                        functionBody = cmd.inner
                     }
 
                     Command.FunctionCall -> {
@@ -128,7 +125,6 @@ class CommandEngine(
 
                     Command.NoOp -> Unit
                 }
-
 
                 delay(stepDelayMs)
             }

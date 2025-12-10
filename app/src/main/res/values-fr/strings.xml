@@ -56,6 +56,11 @@
     <string name="registered">Enregistré !</string>
     <string name="parent_label">Parent : %1$s %2$s</string>
 
+    <!-- Pause Screen -->
+    <string name="resume">Reprendre</string>
+    <string name="music">Musique</string>
+
+
     <!-- Difficulty -->
     <string name="choose_difficulty">Choisissez votre difficulté</string>
     <string name="easy_mode">Mode Facile</string>

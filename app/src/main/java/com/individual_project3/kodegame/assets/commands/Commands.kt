@@ -11,27 +11,27 @@ sealed class Command {
     // repeat N { body }
     data class Repeat(
         val times: Int,
-        val body: List<Command>
+        val inner: Command
     ) : Command()
 
     // if strawberries >= min { body }
     data class IfHasStrawberries(
         val min: Int,
-        val body: List<Command>
+        val inner: Command
     ) : Command()
 
     // For now, advanced forms are represented but not deeply used
     data class RepeatUntilGoal(
-        val body: List<Command>
+        val inner: Command
     ) : Command()
 
     data class RepeatWhileHasStrawberries(
-        val body: List<Command>
+        val inner: Command
     ) : Command()
 
     // Defines a function body
     data class FunctionDefinition(
-        val body: List<Command>
+        val inner: List<Command>
     ) : Command()
 
     // Call previously-defined function
@@ -42,10 +42,106 @@ sealed class Command {
 }
 
 
-
-// NestedProgramParser.kt
 object NestedProgramParser {
+
     fun toEngineCommands(ui: List<UiCommand>): List<Command> {
-        return ui.flatMap { it.toEngineCommands() }
+        val out = mutableListOf<Command>()
+        var i = 0
+
+        var collectingFunction = false
+        var functionBody = mutableListOf<Command>()
+
+        fun emit(cmd: Command) {
+            if (collectingFunction) {
+                functionBody.add(cmd)
+            } else {
+                out.add(cmd)
+            }
+        }
+
+        while (i < ui.size) {
+            val cmd = ui[i]
+
+            when (cmd) {
+
+                // ---------- FUNCTION START ----------
+                UiCommand.FunctionStart -> {
+                    collectingFunction = true
+                    functionBody = mutableListOf()
+                    i++  // move past FunctionStart
+                }
+
+                // ---------- FUNCTION END ----------
+                UiCommand.EndFunction -> {
+                    collectingFunction = false
+                    emit(Command.FunctionDefinition(functionBody.toList()))
+                    functionBody = mutableListOf()
+                    i++ // move past EndFunction
+                }
+
+                // ---------- FUNCTION CALL ----------
+                UiCommand.FunctionCall -> {
+                    emit(Command.FunctionCall)
+                    i++
+                }
+
+                // ---------- REPEAT N (applies to NEXT command only) ----------
+                is UiCommand.Repeat -> {
+                    val next = ui.getOrNull(i + 1)
+                    val inner = next?.toEngineCommands()?.firstOrNull() ?: Command.NoOp
+
+                    emit(Command.Repeat(cmd.times, inner))
+
+                    // Skip over the body command so it isn't also executed separately.
+                    // Example: Repeat 3, Down, Right -> Repeat(3, Down), Right
+                    i += 2
+                }
+
+                // ---------- IF strawberry (NEXT command only) ----------
+                is UiCommand.IfHasStrawberry -> {
+                    val next = ui.getOrNull(i + 1)
+                    val inner = next?.toEngineCommands()?.firstOrNull() ?: Command.NoOp
+
+                    emit(Command.IfHasStrawberries(min = 1, inner = inner))
+
+                    i += 2
+                }
+
+                // ---------- UNTIL GOAL (NEXT command only) ----------
+                is UiCommand.RepeatUntilGoal -> {
+                    val next = ui.getOrNull(i + 1)
+                    val inner = next?.toEngineCommands()?.firstOrNull() ?: Command.NoOp
+
+                    emit(Command.RepeatUntilGoal(inner))
+
+                    i += 2
+                }
+
+                // ---------- WHILE strawberries > 0 (NEXT command only) ----------
+                is UiCommand.RepeatWhileHasStrawberry -> {
+                    val next = ui.getOrNull(i + 1)
+                    val inner = next?.toEngineCommands()?.firstOrNull() ?: Command.NoOp
+
+                    emit(Command.RepeatWhileHasStrawberries(inner))
+
+                    i += 2
+                }
+
+                // ---------- FUNCTION DEFINITION (if ever created directly) ----------
+                is UiCommand.FunctionDefinition -> {
+                    val innerCommands = cmd.innerBody.flatMap { it.toEngineCommands() }
+                    emit(Command.FunctionDefinition(innerCommands))
+                    i++
+                }
+
+                // ---------- SIMPLE MOVES ----------
+                else -> {
+                    cmd.toEngineCommands().forEach { emit(it) }
+                    i++
+                }
+            }
+        }
+
+        return out
     }
 }

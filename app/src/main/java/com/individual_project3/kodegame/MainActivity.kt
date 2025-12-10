@@ -9,6 +9,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.os.LocaleListCompat
 import com.individual_project3.kodegame.ui.Navigation
@@ -42,6 +43,13 @@ fun AppWithLocaleSupport() {
     CompositionLocalProvider(LocalAppLocale provides appLocaleState.value) {
         Navigation()
     }
+
+    LaunchedEffect(Unit) {
+        if (KodeGameApp.audio.isNotPlaying()) {   // You will add this helper
+            KodeGameApp.audio.startBackground(R.raw.sfx_game_music)
+        }
+    }
+
 }
 
 @SuppressLint("LocalContextConfigurationRead")

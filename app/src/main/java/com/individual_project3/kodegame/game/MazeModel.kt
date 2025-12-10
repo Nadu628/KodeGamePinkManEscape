@@ -58,7 +58,8 @@ data class DifficultyParams(
     val rewardDensity: Double,
     val enemyCount: Int,
     val branchingFactor: Double,
-    val deadEndFavor: Double
+    val deadEndFavor: Double,
+    val shortExit: Boolean
 )
 
 // Plans learning concepts per level
@@ -84,10 +85,10 @@ object LearningGoalPlanner {
 // Produces parameters from difficulty + level
 object DifficultyParamFactory {
     fun create(level: Int, mode: DifficultyMode): DifficultyParams {
-        val baseW = if (mode == DifficultyMode.EASY) 15 else 21
-        val baseH = if (mode == DifficultyMode.EASY) 11 else 17
-        val width = (baseW + (level / 2)).coerceAtMost(if (mode == DifficultyMode.EASY) 25 else 31)
-        val height = (baseH + (level / 2)).coerceAtMost(if (mode == DifficultyMode.EASY) 21 else 27)
+        val baseW = if (mode == DifficultyMode.EASY) 11 else 21
+        val baseH = if (mode == DifficultyMode.EASY) 9 else 17
+        val width = (baseW + (level / 2)).coerceAtMost(if (mode == DifficultyMode.EASY) 17 else 31)
+        val height = (baseH + (level / 2)).coerceAtMost(if (mode == DifficultyMode.EASY) 15 else 27)
 
         return when (mode) {
             DifficultyMode.EASY -> DifficultyParams(
@@ -97,7 +98,8 @@ object DifficultyParamFactory {
                 rewardDensity = 0.06 + (level * 0.003),
                 enemyCount = (level / 3).coerceAtMost(3),
                 branchingFactor = 0.35,
-                deadEndFavor = 0.30
+                deadEndFavor = 0.30,
+                shortExit = true
             )
             DifficultyMode.HARD -> DifficultyParams(
                 width = width,
@@ -106,7 +108,8 @@ object DifficultyParamFactory {
                 rewardDensity = 0.03 + (level * 0.002),
                 enemyCount = (1 + level / 2).coerceAtMost(7),
                 branchingFactor = 0.55,
-                deadEndFavor = 0.45
+                deadEndFavor = 0.45,
+                shortExit = false
             )
         }
     }

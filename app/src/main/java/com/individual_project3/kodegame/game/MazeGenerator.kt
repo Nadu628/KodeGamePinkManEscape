@@ -131,7 +131,14 @@ object MazeGenerator {
 
         // START and EXIT: always on PATH, always connected
         val start = pathCells.firstOrNull() ?: Cell(startR, startC)
-        val exit = bfsFarthest(start)
+        val exit = if(params.shortExit){
+            pathCells.firstOrNull{cell ->
+                val dist = kotlin.math.abs(cell.r - start.r) + kotlin.math.abs(cell.c - start.c)
+                dist in 4..(w+h)/3
+            } ?: start
+        }else{
+            bfsFarthest(start)
+        }
         tiles[idx(start.r, start.c)] = TileType.START
         tiles[idx(exit.r, exit.c)] = TileType.EXIT
 

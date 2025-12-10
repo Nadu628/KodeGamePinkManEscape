@@ -58,6 +58,9 @@
     <string name="parent_label">保護者: %1$s %2$s</string>
     <string name="select_parent">保護者を選択</string>
 
+    <!-- Pause Screen-->
+    <string name="resume">再開</string>
+    <string name="music">音楽</string>
 
 
     <!-- Difficulty -->

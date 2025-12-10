@@ -25,8 +25,5 @@ class KodeGameApp : Application() {
             R.raw.sfx_collecting_fruit,
             R.raw.sfx_success
         )
-
-        // Start global background music here
-        audio.startBackground(R.raw.sfx_game_music)
     }
 }

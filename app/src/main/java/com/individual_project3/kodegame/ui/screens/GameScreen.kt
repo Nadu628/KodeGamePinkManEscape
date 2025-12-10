@@ -36,16 +36,20 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.zIndex
 import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.LocalizedString
 import com.individual_project3.kodegame.assets.commands.NestedProgramParser
 import com.individual_project3.kodegame.assets.commands.UiCommand
 import com.individual_project3.kodegame.game.MazeRendererWithSprites
+import com.individual_project3.kodegame.ui.splash.LanguagePickerDialog
+import com.individual_project3.kodegame.ui.splash.updateAppLocale
 import com.individual_project3.kodegame.ui.viewModel.buildStructuredProgram
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.coroutineScope
 
 
 @SuppressLint("StringFormatInvalid")
@@ -79,6 +83,11 @@ fun GameScreen(
 
     val isDraggingFromPalette = remember { mutableStateOf(false) }
 
+    var isPaused by remember { mutableStateOf(false) }
+    var musicOn by remember { mutableStateOf(true) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+
+
     // Load maze on difficulty change
     LaunchedEffect(difficulty) {
         firstPositionSynced.value = false
@@ -103,11 +112,11 @@ fun GameScreen(
             }
 
             val duration = when (vm.playerAnimState.value) {
-                PlayerAnimState.Run -> 80L
+                PlayerAnimState.Run -> 500L
                 PlayerAnimState.Jump,
-                PlayerAnimState.Drop -> 120L
+                PlayerAnimState.Drop -> 700L
                 PlayerAnimState.Hit -> 140L
-                else -> 140L
+                else -> 300L
             }
 
             if (frames.isNotEmpty()) {
@@ -118,216 +127,279 @@ fun GameScreen(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(gradient)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        Spacer(modifier = Modifier.height(30.dp))  // increased
-
-        // -------------------- TOP BAR -------------------------
+    //-------------------- UI LAYOUT -----------------------------
+    Box(modifier = Modifier.fillMaxSize()){
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 24.dp, bottom = 8.dp),
+                .fillMaxSize()
+                .background(gradient)
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            // Row 1: Back | Mode | Exit
-            Row(
+            Spacer(modifier = Modifier.height(30.dp))  // increased
+
+            // -------------------- TOP BAR -------------------------
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(top = 24.dp, bottom = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                CloudButtonTwo(
-                    text = LocalizedString(R.string.back),
-                    modifier = Modifier.width(100.dp),
-                    onClick = {
-                        audio.play(R.raw.sfx_button_click)
-                        onBack?.invoke() ?: navController.popBackStack()
-                    }
-                )
 
-                Text(
-                    text = context.getString(R.string.mode, difficulty.name)
-                    ,
-                    fontFamily = bubbleFont,
-                    fontSize = 18.sp,
-                    color = Color.White
-                )
-
-                CloudButtonTwo(
-                    text = LocalizedString(R.string.exit),
-                    modifier = Modifier.width(100.dp),
-                    onClick = {
-                        audio.play(R.raw.sfx_button_click)
-                        navController.navigate("difficulty_screen") {
-                            popUpTo("game_screen") { inclusive = true }
-                        }
-                    }
-                )
-            }
-
-            Spacer(Modifier.height(10.dp))
-
-            // Row 2: Next | Reset | Play
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (vm.levelCompleted.value) {
+                // Row 1: Back | Mode | Exit
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     CloudButtonTwo(
-                        text = LocalizedString(R.string.next),
+                        text = LocalizedString(R.string.back),
+                        modifier = Modifier.width(100.dp),
+                        onClick = {
+                            audio.play(R.raw.sfx_button_click)
+                            onBack?.invoke() ?: navController.popBackStack()
+                        }
+                    )
+
+                    Text(
+                        text = context.getString(R.string.mode, difficulty.name)
+                        ,
+                        fontFamily = bubbleFont,
+                        fontSize = 18.sp,
+                        color = Color.White
+                    )
+
+                    CloudButtonTwo(
+                        text = LocalizedString(R.string.exit),
+                        modifier = Modifier.width(100.dp),
+                        onClick = {
+                            audio.play(R.raw.sfx_button_click)
+                            navController.navigate("difficulty_screen") {
+                                popUpTo("game_screen") { inclusive = true }
+                            }
+                        }
+                    )
+
+                    IconButton(
+                        onClick = {
+                            vm.cancelProgram()
+                            isPaused = true
+                        }
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.pause),
+                            contentDescription = "Pause",
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+
+                }
+
+                Spacer(Modifier.height(10.dp))
+
+                // Row 2: Next | Reset | Play
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (vm.levelCompleted.value) {
+                        CloudButtonTwo(
+                            text = LocalizedString(R.string.next),
+                            modifier = Modifier.width(100.dp),
+                            onClick = {
+                                audio.play(R.raw.sfx_button_click)
+                                vm.levelCompleted.value = false
+                                firstPositionSynced.value = false
+                                vm.generateNextLevel(difficulty)
+                            }
+                        )
+                    }
+
+
+                    Spacer(Modifier.width(10.dp))
+
+                    CloudButtonTwo(
+                        text = LocalizedString(R.string.reset),
+                        modifier = Modifier.width(100.dp),
+                        onClick = {
+                            audio.play(R.raw.sfx_button_click)
+                            vm.cancelProgram()
+                            vm.resetPlayerToStart()
+                            firstPositionSynced.value = false
+                        }
+                    )
+
+                    Spacer(Modifier.width(10.dp))
+
+                    CloudButtonTwo(
+                        text = LocalizedString(R.string.play),
                         modifier = Modifier.width(100.dp),
                         onClick = {
                             audio.play(R.raw.sfx_button_click)
                             vm.levelCompleted.value = false
-                            firstPositionSynced.value = false
-                            vm.generateNextLevel(difficulty)
-                        }
-                    )
-                }
 
+                            if (!vm.isProgramRunning.value) {
 
-                Spacer(Modifier.width(10.dp))
+                                val frozenUiProgram = vm.uiProgram.toList()
+                                //val structured = buildStructuredProgram(frozenUiProgram)
+                                val engineProgram = NestedProgramParser.toEngineCommands(frozenUiProgram)
 
-                CloudButtonTwo(
-                    text = LocalizedString(R.string.reset),
-                    modifier = Modifier.width(100.dp),
-                    onClick = {
-                        audio.play(R.raw.sfx_button_click)
-                        vm.cancelProgram()
-                        vm.resetPlayerToStart()
-                        firstPositionSynced.value = false
-                    }
-                )
+                                println("ENGINE PROGRAM = $engineProgram")
 
-                Spacer(Modifier.width(10.dp))
+                                vm.setLastProgram(engineProgram)
 
-                CloudButtonTwo(
-                    text = LocalizedString(R.string.play),
-                    modifier = Modifier.width(100.dp),
-                    onClick = {
-                        audio.play(R.raw.sfx_button_click)
-                        vm.levelCompleted.value = false
-                        if (!vm.isProgramRunning.value) {
-                            val frozenUiProgram = vm.uiProgram.toList()
-                            val structured = buildStructuredProgram(frozenUiProgram)
-                            val engineProgram = NestedProgramParser.toEngineCommands(structured)
+                                // Reset player state ONLY
+                                vm.resetPlayerToStart()
 
-                            vm.setLastProgram(engineProgram)
+                                // Force first animation snap on next render
+                                firstPositionSynced.value = false
 
-                            vm.resetPlayerToStart()
-                            firstPositionSynced.value = false
-
-                            vm.playerState.value?.pos?.let { pos ->
-                                scope.launch {
-                                    animX.snapTo(pos.x.toFloat())
-                                    animY.snapTo(pos.y.toFloat())
-                                }
+                                vm.runLastProgram(stepDelayMs = 200L)
                             }
-                            vm.runLastProgram(stepDelayMs = 300L)
                         }
-                    }
-                )
-            }
-        }
-
-        // ---------------------- MAZE -------------------------
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            contentAlignment = Alignment.Center
-        ) {
-            val maze = vm.currentMaze.value
-
-            if (maze == null) {
-                Text(
-                    LocalizedString(R.string.loading),
-                    color = Color.White,
-                    fontFamily = bubbleFont,
-                    fontSize = 20.sp
-                )
-            } else {
-                BoxWithConstraints(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    val tileSizeDp = maxWidth / maze.width
-                    val tileSizePx = with(LocalDensity.current) { tileSizeDp.toPx() }
-
-                    // Animate movement
-                    LaunchedEffect(vm.playerState.value?.pos) {
-                        val pos = vm.playerState.value?.pos ?: return@LaunchedEffect
-
-                        val firstSync = firstPositionSynced.value
-
-                        if (!firstSync) {
-                            animX.snapTo(pos.x.toFloat())
-                            animY.snapTo(pos.y.toFloat())
-                            firstPositionSynced.value = true
-                        } else {
-                            animX.animateTo(
-                                targetValue = pos.x.toFloat(),
-                                animationSpec = tween(200, easing = LinearEasing)
-                            )
-                            animY.animateTo(
-                                targetValue = pos.y.toFloat(),
-                                animationSpec = tween(200, easing = LinearEasing)
-                            )
-                        }
-                    }
-                    val frame = when (vm.playerAnimState.value) {
-                        PlayerAnimState.Jump ->
-                            spriteManager.playerJumpFrames.getOrNull(playerFrameIndex)
-                        PlayerAnimState.Drop ->
-                            spriteManager.playerDropFrames.getOrNull(playerFrameIndex)
-                        PlayerAnimState.Run  ->
-                            spriteManager.playerRunFrames.getOrNull(playerFrameIndex)
-                        PlayerAnimState.Hit  ->
-                            spriteManager.playerHitFrames.getOrNull(playerFrameIndex)
-                        else ->
-                            spriteManager.playerIdleFrames.getOrNull(playerFrameIndex)
-                    }
-
-                    MazeRendererWithSprites(
-                        maze = maze,
-                        playerImage = frame,
-                        playerAnimX = animX.value,
-                        playerAnimY = animY.value,
-                        spriteManager = spriteManager,
-                        tileSizeDp = tileSizeDp
                     )
+
                 }
             }
+
+            // ---------------------- MAZE -------------------------
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentAlignment = Alignment.Center
+            ) {
+                val maze = vm.currentMaze.value
+
+                if (maze == null) {
+                    Text(
+                        LocalizedString(R.string.loading),
+                        color = Color.White,
+                        fontFamily = bubbleFont,
+                        fontSize = 20.sp
+                    )
+                } else {
+                    BoxWithConstraints(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        val tileSizeDp = maxWidth / maze.width
+                        val tileSizePx = with(LocalDensity.current) { tileSizeDp.toPx() }
+
+                        // Animate movement
+                        LaunchedEffect(Unit) {
+                            snapshotFlow { vm.playerState.value?.pos }
+                                .collect { pos ->
+                                    if (pos == null) return@collect
+
+                                    if (tileSizePx == 0f) return@collect
+
+                                    val firstSync = firstPositionSynced.value
+
+                                    val targetX = pos.x.toFloat()
+                                    val targetY = pos.y.toFloat()
+
+                                    if (!firstSync) {
+                                        animX.snapTo(targetX)
+                                        animY.snapTo(targetY)
+                                        firstPositionSynced.value = true
+                                    } else {
+                                        coroutineScope {
+                                            animX.animateTo(targetX, tween(250))
+                                            animY.animateTo(targetY, tween(250))
+                                        }
+
+                                    }
+                                }
+                        }
+
+                        val frame = when (vm.playerAnimState.value) {
+                            PlayerAnimState.Jump ->
+                                spriteManager.playerJumpFrames.getOrNull(playerFrameIndex)
+                            PlayerAnimState.Drop ->
+                                spriteManager.playerDropFrames.getOrNull(playerFrameIndex)
+                            PlayerAnimState.Run  ->
+                                spriteManager.playerRunFrames.getOrNull(playerFrameIndex)
+                            PlayerAnimState.Hit  ->
+                                spriteManager.playerHitFrames.getOrNull(playerFrameIndex)
+                            else ->
+                                spriteManager.playerIdleFrames.getOrNull(playerFrameIndex)
+                        }
+
+                        MazeRendererWithSprites(
+                            maze = maze,
+                            playerImage = frame,
+                            playerAnimX = animX.value,
+                            playerAnimY = animY.value,
+                            spriteManager = spriteManager,
+                            tileSizeDp = tileSizeDp
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            // ---------------- PROGRAM TRACK (DROP AREA) -----------------
+            ProgramTrackBar(
+                program = vm.uiProgram,
+                onRemoveAt = { vm.removeUiCommandAt(it) },
+                dropActive = isDraggingFromPalette.value
+            )
+
+            Spacer(Modifier.height(10.dp))
+
+            // -------------- DRAGGABLE COMMAND PALETTE -------------------
+            CommandPaletteBar(
+                difficulty = difficulty,
+                onAddCommand = { vm.addUiCommand(it) },
+                isDraggingFromPalette = isDraggingFromPalette
+            )
+
         }
 
-        Spacer(Modifier.height(4.dp))
+        if (isPaused) {
+            PauseMenuOverlay(
+                onResume = { isPaused = false; KodeGameApp.audio.play(R.raw.sfx_button_click) },
+                onLanguage = { showLanguageDialog = true; KodeGameApp.audio.play(R.raw.sfx_button_click) },
+                onToggleMusic = {
+                    KodeGameApp.audio.play(R.raw.sfx_button_click)
+                    musicOn = !musicOn
+                    if (musicOn) {
+                        KodeGameApp.audio.startBackground(R.raw.sfx_game_music)
+                    } else {
+                        KodeGameApp.audio.stopBackground()
+                    }
+                },
+                musicOn = musicOn,
+                onLogout = {
+                    KodeGameApp.audio.play(R.raw.sfx_button_click)
+                    isPaused = false
+                    navController.navigate("login") {
+                        popUpTo("game_screen") { inclusive = true }
+                    }
+                },
+                modifier = Modifier.zIndex(100f)
+            )
+        }
 
-        // ---------------- PROGRAM TRACK (DROP AREA) -----------------
-        ProgramTrackBar(
-            program = vm.uiProgram,
-            onRemoveAt = { vm.removeUiCommandAt(it) },
-            dropActive = isDraggingFromPalette.value
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        // -------------- DRAGGABLE COMMAND PALETTE -------------------
-        CommandPaletteBar(
-            difficulty = difficulty,
-            onAddCommand = { vm.addUiCommand(it) },
-            isDraggingFromPalette = isDraggingFromPalette
-        )
+        if (showLanguageDialog) {
+            LanguagePickerDialog(
+                onDismiss = { showLanguageDialog = false; KodeGameApp.audio.play(R.raw.sfx_button_click) },
+                onLanguageSelected = { locale ->
+                    updateAppLocale(locale)
+                    showLanguageDialog = false
+                }
+            )
+        }
     }
+
 }
 
 @Composable

@@ -56,6 +56,11 @@
     <string name="parent_label">Tutor: %1$s %2$s</string>
     <string name="select_parent">Seleccionar tutor</string>
 
+    <!-- Pause Screen -->
+    <string name="resume">Reanudar</string>
+    <string name="music">Música</string>
+
+
     <!-- Difficulty -->
     <string name="choose_difficulty">Elige tu dificultad</string>
     <string name="easy_mode">Modo Fácil</string>

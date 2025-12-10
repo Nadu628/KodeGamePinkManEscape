@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import com.individual_project3.kodegame.R
 import androidx.navigation.NavController
+import com.individual_project3.kodegame.KodeGameApp
 import com.individual_project3.kodegame.assets.audio.AudioManager
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -56,7 +57,7 @@ fun SplashScreen(navController: NavController) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var showLanguageDialog by remember { mutableStateOf(false) }
-    val audio = remember { AudioManager(context) }
+    val audio = KodeGameApp.audio
 
 // load just click sound
     LaunchedEffect(Unit) {
@@ -134,12 +135,14 @@ fun SplashScreen(navController: NavController) {
         if (showPrompt) {
             IconButton(
                 onClick = {
+                    KodeGameApp.audio.play(R.raw.sfx_button_click)
                     showLanguageDialog = true
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 40.dp)
             ) {
+
                 Icon(
                     painter = painterResource(id = R.drawable.ic_language),
                     contentDescription = "Language",

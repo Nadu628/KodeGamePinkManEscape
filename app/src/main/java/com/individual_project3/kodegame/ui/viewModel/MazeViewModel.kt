@@ -16,10 +16,8 @@ import com.individual_project3.kodegame.R
 import com.individual_project3.kodegame.assets.commands.Command
 import com.individual_project3.kodegame.assets.commands.CommandEngine
 import com.individual_project3.kodegame.assets.commands.ExecEvent
-import com.individual_project3.kodegame.assets.commands.NestedProgramParser
 import com.individual_project3.kodegame.assets.commands.Pos
 import com.individual_project3.kodegame.assets.commands.UiCommand
-import com.individual_project3.kodegame.assets.commands.toEngineCommands
 import com.individual_project3.kodegame.data.db.AppDatabase
 import com.individual_project3.kodegame.data.progress.ProgressRecord
 import com.individual_project3.kodegame.game.DifficultyMode
@@ -93,10 +91,6 @@ class MazeViewModel(
     fun stopBackgroundMusic() {
         audioManager.stopBackground()
     }
-    // --- NEW: button click sound ---
-    fun playClick() {
-        audioManager.play(R.raw.sfx_button_click)
-    }
 
 
     // ---------- UI PROGRAM (BLOCKS) ----------
@@ -108,27 +102,6 @@ class MazeViewModel(
     fun removeUiCommandAt(index: Int) {
         if (index in uiProgram.indices) uiProgram.removeAt(index)
     }
-
-    /**
-     * Called when the child presses PLAY.
-     * Converts the block list -> Command tree, then runs it.
-     */
-    fun runUiProgram(stepDelayMs: Long = 350L) {
-        if (uiProgram.isEmpty()) {
-            appendLog("Program is empty")
-            return
-        }
-
-        // Freeze current UI program (so changes while running don’t break it)
-        val snapshot = uiProgram.toList()
-
-        //Uses the extension we just defined
-        val engineProgram = snapshot.flatMap { it.toEngineCommands() }
-
-        setLastProgram(engineProgram)
-        runLastProgram(stepDelayMs)
-    }
-
 
 
     fun setLastProgram(program: List<Command>) {

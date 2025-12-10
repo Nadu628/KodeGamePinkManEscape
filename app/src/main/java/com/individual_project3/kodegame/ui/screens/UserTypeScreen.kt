@@ -203,8 +203,9 @@ fun UserTypeScreen(
             }
         }
 
+        //show languages
         IconButton(
-            onClick = { showLanguageDialog = true },
+            onClick = { showLanguageDialog = true; KodeGameApp.audio.play(R.raw.sfx_button_click) },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 40.dp)

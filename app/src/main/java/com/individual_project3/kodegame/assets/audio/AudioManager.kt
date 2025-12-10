@@ -68,6 +68,11 @@ class AudioManager(private val context: Context) {
         bgPlayer = null
     }
 
+    fun isNotPlaying(): Boolean {
+        return bgPlayer == null || bgPlayer?.isPlaying == false
+    }
+
+
     fun release() {
         stopBackground()
         soundPool.release()

@@ -36,7 +36,7 @@ sealed class UiCommand {
 
     // explicit function body (for later)
     data class FunctionDefinition(
-        val body: MutableList<UiCommand> = mutableListOf()
+        val innerBody: MutableList<UiCommand> = mutableListOf()
     ) : UiCommand()
 }
 
@@ -47,41 +47,28 @@ fun UiCommand.toEngineCommands(): List<Command> = when (this) {
     UiCommand.MoveLeft  -> listOf(Command.Move(Direction.LEFT))
     UiCommand.MoveRight -> listOf(Command.Move(Direction.RIGHT))
 
-    is UiCommand.Repeat -> listOf(
-        Command.Repeat(
-            times = this.times,
-            body = this.body.flatMap { it.toEngineCommands() }
-        )
-    )
+    // Control blocks are handled in NestedProgramParser,
+    // so we map them to placeholders if ever called directly.
+    is UiCommand.Repeat ->
+        listOf(Command.Repeat(times = this.times, inner = Command.NoOp))
 
-    is UiCommand.IfHasStrawberry -> listOf(
-        Command.IfHasStrawberries(
-            min = 1,
-            body = this.body.flatMap { it.toEngineCommands() }
-        )
-    )
+    is UiCommand.IfHasStrawberry ->
+        listOf(Command.IfHasStrawberries(min = 1, inner = Command.NoOp))
 
-    is UiCommand.RepeatUntilGoal -> listOf(
-        Command.RepeatUntilGoal(
-            body = this.body.flatMap { it.toEngineCommands() }
-        )
-    )
+    is UiCommand.RepeatUntilGoal ->
+        listOf(Command.RepeatUntilGoal(inner = Command.NoOp))
 
-    is UiCommand.RepeatWhileHasStrawberry -> listOf(
-        Command.RepeatWhileHasStrawberries(
-            body = this.body.flatMap { it.toEngineCommands() }
-        )
-    )
+    is UiCommand.RepeatWhileHasStrawberry ->
+        listOf(Command.RepeatWhileHasStrawberries(inner = Command.NoOp))
 
-    // One function definition per program
-    is UiCommand.FunctionDefinition -> listOf(
-        Command.FunctionDefinition(
-            body = this.body.flatMap { it.toEngineCommands() }
-        )
-    )
+    UiCommand.FunctionCall ->
+        listOf(Command.FunctionCall)
 
-    UiCommand.FunctionCall -> listOf(Command.FunctionCall)
+    UiCommand.FunctionStart -> emptyList()
+    UiCommand.EndFunction   -> emptyList()
 
-    UiCommand.FunctionStart -> emptyList() // UI-only markers
-    UiCommand.EndFunction -> emptyList()
+    is UiCommand.FunctionDefinition -> {
+        val innerBodyCommands = this.innerBody.flatMap { it.toEngineCommands() }
+        listOf(Command.FunctionDefinition(inner = innerBodyCommands))
+    }
 }

@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.animation)
     implementation(libs.material3)
+    implementation(libs.androidx.foundation.layout)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.androidx.core.ktx)

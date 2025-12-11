@@ -149,8 +149,10 @@ fun ParentLoginScreen(
                 CloudButtonTwo(LocalizedString(R.string.login)) {
                     viewModel.loginParent(email, password){id ->
                         if(id != null){
+                            audio.play(R.raw.sfx_button_click)
                             navController.navigate("parent_dashboard/$id")
                         }else{
+                            audio.play(R.raw.sfx_button_click)
                             Toast.makeText(context, context.getString(R.string.invalid_credentials), Toast.LENGTH_SHORT).show()
                         }
                     }

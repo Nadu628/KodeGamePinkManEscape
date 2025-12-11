@@ -83,7 +83,7 @@ fun ParentDashboardScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             Text(
                 LocalizedString(R.string.parent_dashboard), fontSize = 32.sp, fontFamily = bubbleFont, color = Color.White

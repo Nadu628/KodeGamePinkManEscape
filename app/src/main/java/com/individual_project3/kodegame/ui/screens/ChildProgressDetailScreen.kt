@@ -100,6 +100,7 @@ fun ChildProgressScreen(
 
             // ------------ TOP BAR ------------
 
+            Spacer(modifier = Modifier.height(30.dp))
             Text(
                 LocalizedString(R.string.child_progress),
                 fontSize = 28.sp,

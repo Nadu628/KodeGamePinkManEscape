@@ -33,6 +33,28 @@ All screens and UI text dynamically update when a language is selected.
 - Screen transition animations
 - Multi-language support
 
+**Procedural Maze Generation**  
+The game features a procedural maze generator that creates levels dynamically rather than relying on static maps.
+
+**Maze Generator Characteristics:**
+- Generates new mazes for each level
+- Ensures a valid path from start to goal
+- Supports different rules for Easy and Hard modes
+- Dynamically places:
+  - Walls
+  - Hazards (spikes)
+  - Rewards (strawberries)
+- Prevents unfair layouts by keeping hazards away from critical paths
+
+This system provides high replayability and prevents players from memorizing solutions.
+
+**Pause Menu**  
+During gameplay, players can open a pause menu overlay that allows them to:
+- Resume gameplay
+- Turn background music on/off
+- Change the application language
+- Log out
+  
 **Parent Features**
 - Parent login and registraion
 - Add child profiles
@@ -59,3 +81,59 @@ All screens and UI text dynamically update when a language is selected.
   - values-ht/strings.xml (Haitian Creole)
   - values-ja/strings.xml (Japan)
 - Uses a dedicated LocalizedString() composable for all text rendering
+
+**Architecture**  
+The project follows a modular and maintainable Android architecture.
+
+- UI Layer (Jetpack Compose)
+  -Screens
+  - Navigation graph
+  - Reusable composables
+  - Custom animations
+  - Sprite rendering
+  - Dialogs and overlays
+
+- Logic Layer
+  - Game execution engine
+  - Command parsing and execution
+  - Program validation
+  - Player movement rules
+  - Maze generation logic
+
+- Data Layer
+  - Room database for persistence
+  - Progress records per child
+  - Parent/child relationships
+  - Local storage for settings and progress
+
+- Audio System
+  - Centralized AudioManager
+  - SoundPool for SFX
+  - MediaPlayer for background music
+  - Controlled from gameplay and pause menu
+
+**Technologies Used**
+- Kotlin
+- Jetpack Compose
+- Android Navigation Component
+- Room Database
+- MPAndroidChart
+- SoundPool & MediaPlayer
+- Coroutines
+- Material Design Components
+
+**Future Enhancements**  
+Planned or potential improvements include:
+- Achievement and badge system
+- Character skin customization
+- Difficulty scaling based on performance
+- Daily challenge mode
+- Accessibility options (text-to-speech, high contrast mode)
+- Cloud backup for progress
+- Online leaderboard (optional)
+- In-app maze editor for children
+
+**Demo Video:**  
+Full Walkthrough: https://www.youtube.com/watch?v=nyXTztZDa9s
+<img width="1600" height="900" alt="kodegame_thumbnail" src="https://github.com/user-attachments/assets/4958cbc4-e1f3-4f13-a629-a2a57ec45254" />
+
